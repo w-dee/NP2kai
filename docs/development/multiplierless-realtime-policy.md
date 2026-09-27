@@ -166,6 +166,13 @@ compatibility propositions and must not imply hardware-qualified VM/VX timing.
 The ESP32-P4 service and deadline requirements, Linux fake-time qualification,
 and separate CPU interrupt acceptance rules still apply.
 
+The owner-selected Phase D1 normalization freezes legacy cycle quantization at
+**M_ref=5**, independently of runtime CPU multiplier. The
+[implementation contract](pit-pic-compat-machine-time.md) records the exact
+PICMASK and current-count conversions, executable parent differential, and
+backend profile boundaries. This is compatibility authority only; the
+historical hardware-authority block remains unchanged.
+
 ## Device migrations and the ARTIC preflight
 
 This policy governs ARTIC and later PIT, GDC, OPNA, PCM, DMA and other device

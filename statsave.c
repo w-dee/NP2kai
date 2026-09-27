@@ -1543,9 +1543,9 @@ static int flagcheck_veronly(STFLAGH sfh, const SFENTRY *tbl) {
 // ----
 
 int statsave_save(const OEMCHAR *filename) {
-#if defined(NP2_ARTIC_MACHINE_TIME)
+#if defined(NP2_ARTIC_MACHINE_TIME) || defined(NP2_PIT_PIC_MACHINE_TIME)
   (void)filename;
-  return STATFLAG_FAILURE; /* Experimental ARTIC is cold-boot only. */
+  return STATFLAG_FAILURE; /* Experimental device timing is cold-boot only. */
 #endif
   if (filename) {
     milstr_ncpy(m_strStateFilename, filename, MAX_PATH);
@@ -1560,8 +1560,8 @@ int statsave_save_d(const OEMCHAR *filename) {
 int statsave_save_d(void) {
 #endif
 
-#if defined(NP2_ARTIC_MACHINE_TIME)
-  return STATFLAG_FAILURE; /* Never serialize/reinterpret the legacy ARTIC chunk. */
+#if defined(NP2_ARTIC_MACHINE_TIME) || defined(NP2_PIT_PIC_MACHINE_TIME)
+  return STATFLAG_FAILURE; /* Never serialize/reinterpret legacy device timing chunks. */
 #endif
 
   SFFILEH sffh;
@@ -1685,10 +1685,14 @@ int statsave_save_d(void) {
 }
 
 int statsave_check(const OEMCHAR *filename, OEMCHAR *buf, int size) {
-#if defined(NP2_ARTIC_MACHINE_TIME)
+#if defined(NP2_ARTIC_MACHINE_TIME) || defined(NP2_PIT_PIC_MACHINE_TIME)
   (void)filename;
   if (buf && size > 0)
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+    milstr_ncpy(buf, OEMTEXT("Experimental PIT/PIC: save/load unsupported (cold-boot only)"), size);
+#else
     milstr_ncpy(buf, OEMTEXT("Experimental ARTIC: save/load unsupported (cold-boot only)"), size);
+#endif
   return STATFLAG_FAILURE;
 #endif
 
@@ -1789,9 +1793,9 @@ int statsave_check(const OEMCHAR *filename, OEMCHAR *buf, int size) {
 }
 
 int statsave_load(const OEMCHAR *filename) {
-#if defined(NP2_ARTIC_MACHINE_TIME)
+#if defined(NP2_ARTIC_MACHINE_TIME) || defined(NP2_PIT_PIC_MACHINE_TIME)
   (void)filename;
-  return STATFLAG_FAILURE; /* Experimental ARTIC is cold-boot only. */
+  return STATFLAG_FAILURE; /* Experimental device timing is cold-boot only. */
 #endif
   if (filename) {
     milstr_ncpy(m_strStateFilename, filename, MAX_PATH);
@@ -1806,8 +1810,8 @@ int statsave_load_d(const OEMCHAR *filename) {
 int statsave_load_d(void) {
 #endif
 
-#if defined(NP2_ARTIC_MACHINE_TIME)
-  return STATFLAG_FAILURE; /* Never serialize/reinterpret the legacy ARTIC chunk. */
+#if defined(NP2_ARTIC_MACHINE_TIME) || defined(NP2_PIT_PIC_MACHINE_TIME)
+  return STATFLAG_FAILURE; /* Never serialize/reinterpret legacy device timing chunks. */
 #endif
 
   SFFILEH sffh;
@@ -2151,7 +2155,7 @@ int statsave_load_d(void) {
 }
 
 int statsave_save_hdd(const OEMCHAR *ext) {
-#if defined(NP2_ARTIC_MACHINE_TIME)
+#if defined(NP2_ARTIC_MACHINE_TIME) || defined(NP2_PIT_PIC_MACHINE_TIME)
   (void)ext;
   return STATFLAG_FAILURE; /* Cold-boot pilot also rejects disk-state snapshots. */
 #endif
@@ -2166,7 +2170,7 @@ int statsave_save_hdd(const OEMCHAR *ext) {
 }
 
 int statsave_load_hdd(const OEMCHAR *ext) {
-#if defined(NP2_ARTIC_MACHINE_TIME)
+#if defined(NP2_ARTIC_MACHINE_TIME) || defined(NP2_PIT_PIC_MACHINE_TIME)
   (void)ext;
   return STATFLAG_FAILURE; /* Cold-boot pilot also rejects disk-state snapshots. */
 #endif

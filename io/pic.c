@@ -1,4 +1,7 @@
 #include	<compiler.h>
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#include <pit0_time.h>
+#endif
 #include	<cpucore.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
@@ -67,6 +70,9 @@ void pic_irq(void) {
 	REG8	bit;
 	REG8	slave;
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	pit0_machine_service();
+#endif
 	// 割込み許可？
 	if (!CPU_isEI) {
 		return;
@@ -117,7 +123,11 @@ void pic_irq(void) {
 		p->pi[0].isr |= bit;
 		p->pi[0].irr &= ~bit;
 		if (num == 0) {
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+			pit0_machine_ack();
+#else
 			nevent_reset(NEVENT_PICMASK);
+#endif
 		}
 		TRACEOUT(("hardware-int %.2x [%.4x:%.4x]", (p->pi[0].icw[1] & 0xf8) | num, CPU_CS, CPU_IP));
 		CPU_INTERRUPT((REG8)((p->pi[0].icw[1] & 0xf8) | num), 0);
@@ -134,6 +144,9 @@ void pic_irq(void) {												// ver0.78
 	REG8	slave;
 	UINT8	intrtmp;
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	pit0_machine_service();
+#endif
 	// 割込み許可？
 #if defined(SUPPORT_IA32_HAXM)
 	if (!np2hax.emumode && np2hax.enable && CPU_STAT_PM) {
@@ -200,7 +213,11 @@ void pic_irq(void) {												// ver0.78
 		p->pi[0].isr |= bit;
 		p->pi[0].irr &= ~bit;
 		if (num == 0) {
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+			pit0_machine_ack();
+#else
 			nevent_reset(NEVENT_PICMASK);
+#endif
 		}
 //		TRACEOUT(("hardware-int %.2x [%.4x:%.4x]", (p->pi[0].icw[1] & 0xf8) | num, CPU_CS, CPU_IP));
 		intrtmp = (p->pi[0].icw[1] & 0xf8) | num;
@@ -216,6 +233,9 @@ void pic_irq(void) {												// ver0.78
 // 簡易モード(SYSTEM TIMERだけ)
 void picmask(NEVENTITEM item) {
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	(void)item;
+#else
 	PICITEM		pi;
 	
 	pic_enter_criticalsection();
@@ -224,6 +244,7 @@ void picmask(NEVENTITEM item) {
 		pi->irr &= ~(pi->imr & PIC_SYSTEMTIMER);
 	}
 	pic_leave_criticalsection();
+#endif
 }
 
 void pic_setirq(REG8 irq) {
@@ -239,6 +260,9 @@ void pic_setirq(REG8 irq) {
 		if (pi[0].imr & bit) {
 			if (bit & PIC_SYSTEMTIMER) {
 				if ((pit.ch[0].ctrl & 0x0c) == 0x04) {
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+					pit0_machine_mask();
+#else
 					SINT32 cnt;										// ver0.29
 					if (pit.ch[0].value > 8) {
 						cnt = pccore.multiple * pit.ch[0].value;
@@ -248,6 +272,7 @@ void pic_setirq(REG8 irq) {
 						cnt = pccore.multiple << (16 - 2);
 					}
 					nevent_set(NEVENT_PICMASK, cnt, picmask, NEVENT_ABSOLUTE);
+#endif
 				}
 			}
 		}
@@ -283,6 +308,9 @@ static void IOOUTCALL pic_o00(UINT port, REG8 dat) {
 	REG8	level;
 	UINT8	ocw3;
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	pit0_machine_service();
+#endif
 	pic_enter_criticalsection();
 //	TRACEOUT(("pic %x %x", port, dat));
 	picp = &pic.pi[(port >> 3) & 1];
@@ -343,6 +371,9 @@ static void IOOUTCALL pic_o02(UINT port, REG8 dat) {
 
 	PICITEM		picp;
 	
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	pit0_machine_service();
+#endif
 	pic_enter_criticalsection();
 //	TRACEOUT(("pic %x %x", port, dat));
 	picp = &pic.pi[(port >> 3) & 1];
@@ -374,6 +405,9 @@ static REG8 IOINPCALL pic_i00(UINT port) {
 
 	PICITEM		picp;
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	pit0_machine_service();
+#endif
 	picp = &pic.pi[(port >> 3) & 1];
 	if (!(picp->ocw3 & PIC_OCW3_RIS)) {
 		return(picp->irr);			// read irr
@@ -387,6 +421,9 @@ static REG8 IOINPCALL pic_i02(UINT port) {
 
 	PICITEM		picp;
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	pit0_machine_service();
+#endif
 	picp = &pic.pi[(port >> 3) & 1];
 	return(picp->imr);
 }

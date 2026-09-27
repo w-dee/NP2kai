@@ -1,4 +1,7 @@
 #include	<compiler.h>
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#include <pit0_time.h>
+#endif
 #include	<common/parts.h>
 #include	<timemng.h>
 #include	<cpucore.h>
@@ -59,6 +62,9 @@ void bios0x1c(void) {
 					iocore_out8(0x71, 0x60);				// 5MHz
 				}
 			}
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+			pit0_machine_service();
+#endif
 			pic.pi[0].imr &= ~(PIC_SYSTEMTIMER);
 			break;
 			

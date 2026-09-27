@@ -5,6 +5,9 @@
 #include	<compiler.h>
 #include	<cpucore.h>
 #include <legacycpu.h>
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#include <pit0_time.h>
+#endif
 #include	<pccore.h>
 #include	<io/iocore.h>
 #include	<sound/sound.h>
@@ -24,6 +27,10 @@ extern	COMMNG	cm_rs232c;
 
 static void setsystimerevent(UINT32 cnt, NEVENTPOSITION absolute) {
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	(void)absolute;
+	pit0_machine_schedule(cnt);
+#else
 	PITCH	pitch;
 	pitch = pit.ch + 0;
 	if (cnt > 8) { // 根拠なし
@@ -33,10 +40,14 @@ static void setsystimerevent(UINT32 cnt, NEVENTPOSITION absolute) {
 		cnt = pccore.multiple << 16;
 	}
 	nevent_set(NEVENT_ITIMER, cnt, systimer, absolute);
+#endif
 }
 
 void systimer(NEVENTITEM item) {
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	(void)item;
+#else
 	PITCH	pitch;
 
 	if (item->flag & NEVENT_SETEVENT) {
@@ -54,6 +65,7 @@ void systimer(NEVENTITEM item) {
 			setsystimerevent(0, NEVENT_RELATIVE);
 		}
 	}
+#endif
 }
 
 
@@ -172,8 +184,12 @@ static UINT getcount(const _PITCH *pitch) {
 
 	switch(pitch->ch) {
 		case 0:
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+			return pit0_machine_count();
+#else
 			clk = nevent_getremain(NEVENT_ITIMER);
 			break;
+#endif
 
 		case 1:
 			switch(pitch->ctrl & 0x06) {
@@ -244,6 +260,9 @@ static void latchcmd(PITCH pitch, REG8 ctrl) {
 
 void pit_setflag(PITCH pitch, REG8 value) {
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	if (pitch == pit.ch) pit0_machine_service();
+#endif
 	if (value & PIT_CTRL_RL) {
 		pitch->ctrl = (UINT8)((value & 0x3f) | PIT_STAT_CMD);
 		pitch->flag &= ~(PIT_FLAG_R | PIT_FLAG_W | PIT_FLAG_L |
@@ -284,6 +303,9 @@ BOOL pit_setcount(PITCH pitch, REG8 value) {
 
 	UINT8	flag;
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	if (pitch == pit.ch) pit0_machine_service();
+#endif
 	switch(pitch->ctrl & PIT_CTRL_RL) {
 		case PIT_RL_L:		// access low
 			pitch->value = value;
@@ -319,6 +341,9 @@ REG8 pit_getstat(PITCH pitch) {
 	UINT16	w;
 	REG8	ret;
 
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	if (pitch == pit.ch) pit0_machine_service();
+#endif
 	flag = pitch->flag;
 #if defined(uPD71054)
 	if (flag & PIT_FLAG_S) {
@@ -480,6 +505,9 @@ static void IOOUTCALL pit_o77(UINT port, REG8 dat) {
 	}
 #if defined(uPD71054)
 	else {
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+		if (dat & 2) pit0_machine_service();
+#endif
 		TRACEOUT(("multiple latch commands - %x", dat));
 		for (chnum=0; chnum<3; chnum++) {
 			if (dat & (2 << chnum)) {
@@ -524,6 +552,9 @@ void itimer_reset(const NP2CFG *pConfig) {
 	pit.ch[3].ch = 3;
 	pit.ch[4].ctrl = 0x36;
 	pit.ch[4].ch = 4;
+#endif
+#if defined(NP2_PIT_PIC_MACHINE_TIME)
+	pit0_machine_reset();
 #endif
 	setsystimerevent(0, NEVENT_ABSOLUTE);
 	beep_lheventset(1);												// ver0.79
