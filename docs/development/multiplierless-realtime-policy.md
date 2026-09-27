@@ -17,7 +17,7 @@ Keep three concerns separate:
 
 | Concern | Contract |
 | --- | --- |
-| Machine time | The time coordinate and progression rules granted to a specific guest-visible device by an approved hardware and lifecycle contract. |
+| Machine time | The time coordinate and progression rules granted to a specific guest-visible device by approved, bounded device semantics and a lifecycle contract. |
 | Platform time source | The mechanism that supplies observations of that coordinate. Its behavior and qualification authority depend on the platform and test mode. |
 | Service scheduler | The software that observes time and performs device work by its deadlines. Its latency does not redefine the clock. |
 
@@ -37,8 +37,8 @@ authoritative source, with realtime, deadline-oriented device service and
 observable service latency. That service is expected to meet explicit deadlines
 for its supported workload envelope. The contract remains conceptually portable
 across source implementations. A source's measured elapsed time alone does not grant
-any device authority to advance; that device needs its own hardware semantics
-and approved lifecycle rules.
+any device authority to advance; that device needs its own approved semantic
+authority and lifecycle rules.
 
 ## Linux qualification
 
@@ -89,7 +89,8 @@ does not stop machine time, automatically replay every missed event, or make
 stale state acceptable. It is a qualification or quality-of-service violation
 for the supported workload envelope that must be detected and reported.
 Recovery, event coalescing, lost events and state advancement must follow each
-device's hardware model and separately approved implementation contract.
+device's hardware-qualified model or approved compatibility profile and its
+separately reviewed implementation contract.
 
 Realtime suitability does not mean deadline misses are impossible. Future
 qualification must define deadlines and measure their compliance, including
@@ -97,14 +98,83 @@ critical sections, interrupt masking, flash/cache/PSRAM activity and scheduling
 contention where applicable. This document does not set numeric deadlines,
 latency budgets or a universal device recovery algorithm.
 
+## Hardware authority and compatibility profiles
+
+Name the semantic authority for each bounded guest-visible proposition:
+
+- `HARDWARE_QUALIFIED_SEMANTICS` requires authoritative hardware evidence or
+  controlled measurement for the target class. Use
+  `HARDWARE_QUALIFIED_ASSERTION` only for the behavior that evidence supports.
+- An owner-approved `LEGACY_COMPATIBILITY_PROFILE` may use existing np2kai
+  guest-visible behavior as the baseline for an **experimental** machine-time
+  migration when physical authority is incomplete. This supports a labeled
+  compatibility claim, not physical PC-98 equivalence.
+
+A compatibility profile is admissible only when the missing evidence would
+otherwise block clock-source decoupling without establishing a contradiction;
+the existing behavior can be stated precisely, inspected and regression-tested;
+and changing the time parent can preserve that behavior. Document the unresolved
+hardware details and exact profile scope. Retain default legacy behavior as a
+rollback and reference path. Where neither hardware authority nor a stable,
+testable existing profile is sufficient, the migration remains blocked.
+
+The first compatibility migration preserves the specified guest-visible
+behavior while changing its authoritative time parent. Preserve, label and
+test necessary legacy quirks; defer their correction. Do not invent hardware
+behavior, silently choose among contradictory sources, or call a compatibility
+quirk hardware-correct. Hardware-qualified behavior takes precedence for its
+bounded proposition and must not be overwritten by a legacy quirk. A later
+hardware correction is a separately reviewed semantic change with its own
+authority, regression tests and qualification. Do not combine it with
+clock-source decoupling unless the owner explicitly authorizes that scope.
+Existing oracle assertions must not be relaxed to fit a migration, and other
+device families receive no time authority merely for convenience.
+
+Future implementation and test reports must distinguish
+`LEGACY_COMPATIBILITY_ASSERTION` from `HARDWARE_QUALIFIED_ASSERTION`. Use
+`ARCHITECTURAL_ASSERTION`, `DEVICE_RELATIONAL_ASSERTION` and
+`INCONCLUSIVE_NEEDS_HARDWARE_AUTHORITY` where they fit. This vocabulary does not
+rename or widen any established [guest oracle](guest-oracles.md) PASS.
+
+### First PIT/PIC pilot
+
+The historical Phase D1 audit remains
+`BLOCKED_PHASE_D1_PIT_PIC_HARDWARE_AUTHORITY` against its hardware-authority
+success condition. This owner decision does not turn it into a hardware PASS.
+It permits a **separately labeled compatibility-profile pilot** under a later
+implementation mission, subject to preservation and regression qualification
+of its explicit profile.
+
+For that pilot, current i286 PIT behavior and current IA-32 behavior with its
+71054-selected path may define separate backend-specific compatibility profiles.
+The current observable mode-3 rewrite, PIT-to-PIC request publication and PIC
+finite-state behavior, including documented quirks, may be retained where
+physical authority is incomplete. Small-count fallback, PICMASK timeout,
+latch/request interactions, status/OUT representation, PIC initialization,
+SFNM/cascade limitations and CRT suppression are examples to preserve, label,
+test and correct separately if needed. No profile is automatically qualified
+merely because this policy allows it.
+
+The unresolved H01A controller identity, H02A GATE0/OUT0-to-IR0 transfer
+function, and NEC71054 mid-half mode-3 rewrite details remain unresolved
+hardware questions. This permission establishes neither VM/VX timer silicon
+identity nor wiring, pulse/latch conditioning, exact electrical INTA timing,
+hardware-correct mode-3 replacement, or equivalence across PC-98 models. A
+future clock-source-decoupling PASS may use a name such as
+`PASS_PHASE_D1_PIT_PIC_COMPATIBILITY_PILOT`; it must state the tested
+compatibility propositions and must not imply hardware-qualified VM/VX timing.
+The ESP32-P4 service and deadline requirements, Linux fake-time qualification,
+and separate CPU interrupt acceptance rules still apply.
+
 ## Device migrations and the ARTIC preflight
 
 This policy governs ARTIC and later PIT, GDC, OPNA, PCM, DMA and other device
-migrations. A future mission must identify its device hardware authority,
-platform-time contract, service ownership, deadline requirements and
-device-specific response to missed service before granting machine-time
-authority. The existing [guest-oracle contract](guest-oracles.md) continues to
-limit what each test PASS can establish.
+migrations. A future mission must identify hardware-qualified semantics or an
+approved legacy compatibility profile, its platform-time contract, service
+ownership, deadline requirements and device-specific response to missed service
+before granting machine-time authority. The existing
+[guest-oracle contract](guest-oracles.md) continues to limit what each test PASS
+can establish.
 
 The ARTIC preflight's primary hardware findings on counter width, nominal rate,
 CPU-clock independence, documented word ports and rollover remain valid for
@@ -127,5 +197,9 @@ Stop and escalate before a future change:
 - treats Linux scheduler elapsed time as normative guest machine time;
 - derives catch-up, freeze or clamp policy from Linux behavior alone;
 - grants a new device machine-time authority without identifying the intended
-  platform-time contract and device hardware semantics; or
+  platform-time contract and bounded device-semantic authority;
+- invents a compatibility profile without stable, testable existing behavior,
+  presents it as hardware truth, bundles an unrelated hardware correction into
+  clock-source decoupling, or overrides hardware-qualified behavior with a
+  legacy quirk; or
 - changes the ESP32-P4 deadline/service model without explicit review.

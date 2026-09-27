@@ -9,3 +9,5 @@
 
 - Read [the normative realtime-target policy](docs/development/multiplierless-realtime-policy.md) before changing machine-time authority, realtime device advancement, stall/catch-up behavior, or deadline scheduling.
 - Stop and escalate before treating Linux scheduler elapsed time as normative guest machine time, deriving a catch-up/freeze/clamp rule from Linux behavior alone, granting another device machine-time authority without its platform-time contract, or changing the ESP32-P4 deadline/service model.
+- Before blocking a multiplierless migration solely for incomplete physical hardware authority, check whether the owner-approved `LEGACY_COMPATIBILITY_PROFILE` path in that policy applies. Keep any hardware-authority audit result distinct from a compatibility-profile pilot.
+- Stop and escalate before inventing a profile without stable, testable existing behavior, presenting compatibility behavior as hardware truth, combining clock-source migration with an unrelated hardware correction, or overriding hardware-qualified semantics with a legacy quirk.
