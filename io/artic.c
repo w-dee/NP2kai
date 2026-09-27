@@ -5,6 +5,17 @@
 #include	<io/iocore.h>
 
 
+#if defined(NP2_ARTIC_MACHINE_TIME)
+#include <artic_time.h>
+
+void artic_callback(void) {
+    /* Analytical phase is materialized only at an ARTIC observation. */
+}
+
+static UINT32 artic_getcnt(void) {
+    return artic_machine_read();
+}
+#else
 void artic_callback(void) {
 
 	SINT32	mul;
@@ -50,6 +61,8 @@ static UINT32 artic_getcnt(void) {
 }
 
 
+#endif
+
 // ---- I/O
 
 static void IOOUTCALL artic_o5f(UINT port, REG8 dat) {
@@ -83,6 +96,9 @@ static REG8 IOINPCALL artic_i5f(UINT port) {
 void artic_reset(const NP2CFG *pConfig) {
 
 	ZeroMemory(&artic, sizeof(artic));
+#if defined(NP2_ARTIC_MACHINE_TIME)
+	artic_machine_reset();
+#endif
 
 	(void)pConfig;
 }

@@ -479,6 +479,27 @@ if(NP2_TIME_SHADOW)
 		"${CMAKE_CURRENT_SOURCE_DIR}/timeshadow_runtime.c")
 endif()
 
+# Private Phase C counter pilot. Legacy remains the default.
+option(NP2_ARTIC_MACHINE_TIME "Experimental cold-boot ARTIC machine time" OFF)
+option(NP2_ARTIC_FAKE_TIME "Private deterministic ARTIC qualification source" OFF)
+if(NP2_ARTIC_FAKE_TIME AND NOT NP2_ARTIC_MACHINE_TIME)
+    message(FATAL_ERROR "ARTIC fake source requires the ARTIC machine-time pilot")
+endif()
+if(NP2_ARTIC_MACHINE_TIME)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT BUILD_SDL OR
+       BUILD_WX OR BUILD_X OR BUILD_LIBRETRO OR USE_ASYNCCPU OR USE_HAXM OR
+       NOT USE_SDL EQUAL 2)
+        message(FATAL_ERROR "ARTIC pilot requires Linux SDL2, single-owner interpreter")
+    endif()
+    add_definitions(-DNP2_ARTIC_MACHINE_TIME)
+    list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/artic_time.c")
+    if(NP2_ARTIC_FAKE_TIME)
+        list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/artic_time_fake.c")
+    else()
+        list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/artic_time_posix.c")
+    endif()
+endif()
+
 # function
 if(USE_TICKCOUNT)
 	list(APPEND NP2kai_TickCount_definitions "SUPPORT_NP2_TICKCOUNT")
