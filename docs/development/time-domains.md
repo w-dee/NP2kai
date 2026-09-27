@@ -3,6 +3,8 @@
 Phase A preserves the cycle-derived timing policy. It introduces an internal
 adapter, not a new clock source. The baseline authority is parent
 `084f9919fbc4f659b94c3ecffdcf25380691ead7` and the bounded time-dependency audit.
+Future machine-time authority follows the [normative realtime-target
+policy](multiplierless-realtime-policy.md).
 
 ## Units and ownership
 

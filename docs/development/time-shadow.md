@@ -4,7 +4,9 @@ Phase B observes a host-monotonic target alongside the Phase A legacy cycle
 domain. **No shadow value has guest-state authority.** All guest/device time
 continues to use the existing legacy model. No device consumes this target;
 Phase B creates no committed device frontier. See [time domains](time-domains.md)
-and the mandatory [guest-oracle contract](guest-oracles.md).
+and the mandatory [guest-oracle contract](guest-oracles.md). Future machine-time
+semantics and platform qualification follow the [normative realtime-target
+policy](multiplierless-realtime-policy.md).
 
 ## Terms and units
 
@@ -164,8 +166,9 @@ epochs. Runtime binding tests exercise commit invariance, overshoot, rescaling
 and reset with the production adapter and a fake source. These are arithmetic
 and binding tests, not device or hardware assertions.
 
-Live qualification requires N1/N2/N3 exact structured OFF/ON equality, both
-DOS/FMP integrations, and the complete Windows 95 state machine with existing
+Live integration qualification requires N1/N2/N3 exact structured OFF/ON
+equality, both DOS/FMP integrations, and the complete Windows 95 state machine
+with existing
 thresholds. At least one FMP diagnostic observation must continue for about
 10 seconds after the normal prompt checkpoint to include background playback.
 That run provides no audio PASS; visual success never proves playback
