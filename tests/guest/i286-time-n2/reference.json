@@ -1,0 +1,10 @@
+{
+  "image_sha256": "a6f36d5b8e190b664ba627d748a68f3a822aaf95fecbd89e22acdf52f6b1451b",
+  "ipl_sha256": "0db62bb720b6fc8cc67b0634a4c6c450fae6944c74a982fad3f41d810429bb2a",
+  "stage2_sha256": "9f079208588ec20ee4cbb752a8b0d33ec63f4a1a8a3df2ce96acd568db96a9d8",
+  "stage2_bytes": 1185,
+  "stage2_sectors": 2,
+  "nasm_version": "NASM version 2.16.01",
+  "format": "raw 77 cylinders x 2 heads x 8 sectors x 1024 bytes",
+  "source_commit": "3944218b948d94b426aaebb93e0401739a0f9aab"
+}
