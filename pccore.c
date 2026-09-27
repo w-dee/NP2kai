@@ -15,6 +15,7 @@
 #include <cpucore.h>
 #include <pccore.h>
 #include <legacycpu.h>
+#include <timeshadow.h>
 #include <io/iocore.h>
 #include <io/gdc_sub.h>
 #include <cbus/cbuscore.h>
@@ -1106,6 +1107,8 @@ void pccore_reset(void) {
   int i;
   BOOL epson;
 
+  time_shadow_reset();
+
 #if defined(SUPPORT_IA32_HAXM)
   if (np2hax.enable) {
     i386hax_createVM();
@@ -1880,6 +1883,7 @@ void pccore_exec(BOOL draw) {
   // UINT32 lastclock;
   // UINT32 mflag = 0;
 
+  time_shadow_service();
   pcstat.drawframe = (UINT8)draw;
   //	keystat_sync();
   soundmng_sync();
@@ -2029,6 +2033,7 @@ void pccore_exec(BOOL draw) {
     pccore_reset();
   }
 
+  time_shadow_service();
 #if defined(TRACE)
   execcnt++;
   if (execcnt >= 60) {

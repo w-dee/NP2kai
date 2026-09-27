@@ -8,6 +8,7 @@
 #include <cpucore.h>
 #include <pccore.h>
 #include <legacycpu.h>
+#include <timeshadow.h>
 
 	_NEVENT g_nevent;
 #if 0
@@ -200,6 +201,7 @@ void nevent_progress(void)
 #if defined(SUPPORT_MULTITHREAD)
 	nevent_enter_criticalsection();
 #endif
+	time_shadow_commit(legacy_cpu_slice_budget());
 	legacy_cpu_commit_slice();
 	nEvents = 0;
 	nextbase = NEVENT_MAXCLOCK;
@@ -260,6 +262,7 @@ void nevent_changeclock(UINT32 oldclock, UINT32 newclock)
 	nevent_enter_criticalsection();
 #endif
 
+	time_shadow_rate_before(oldclock);
 	if (oldclock > 0)
 	{
 		if (g_nevent.readyevents)
@@ -294,6 +297,7 @@ void nevent_changeclock(UINT32 oldclock, UINT32 newclock)
 	nevent_leave_criticalsection();
 #endif
 
+	time_shadow_rate_after(newclock);
 }
 
 void nevent_reset(NEVENTID id)

@@ -4,6 +4,7 @@
  */
 
 #include <compiler.h>
+#include <timeshadow.h>
 #include <pccore.h>
 #include <io/iocore.h>
 
@@ -1795,6 +1796,8 @@ int statsave_load_d(void) {
 #if defined(SUPPORT_FMGEN)
   UINT8 usefmgen = 0;
 #endif
+
+  time_shadow_reset();
 
 #if defined(__LIBRETRO__)
   sffh = statflag_open(filename, NULL, 0);

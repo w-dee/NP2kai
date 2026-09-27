@@ -464,6 +464,21 @@ if(NOT MSVC AND NOT BUILD_LIBRETRO AND NOT EMSCRIPTEN)
 	set(USE_SDL "3" CACHE STRING "SDL version to use (1, 2, or 3)")
 endif()
 
+# Private Phase B diagnostics; no guest/device authority.
+option(NP2_TIME_SHADOW "Build internal shadow-time diagnostics" OFF)
+if(NP2_TIME_SHADOW)
+	if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT BUILD_SDL OR
+	   BUILD_WX OR BUILD_X OR BUILD_LIBRETRO OR USE_ASYNCCPU OR USE_HAXM OR
+	   NOT USE_SDL EQUAL 2)
+		message(FATAL_ERROR "Shadow diagnostics require Linux SDL2, single-owner interpreter")
+	endif()
+	add_definitions(-DNP2_TIME_SHADOW)
+	list(APPEND NP2kai_common_sources
+		"${CMAKE_CURRENT_SOURCE_DIR}/timeshadow_account.c"
+		"${CMAKE_CURRENT_SOURCE_DIR}/timeshadow_posix.c"
+		"${CMAKE_CURRENT_SOURCE_DIR}/timeshadow_runtime.c")
+endif()
+
 # function
 if(USE_TICKCOUNT)
 	list(APPEND NP2kai_TickCount_definitions "SUPPORT_NP2_TICKCOUNT")
