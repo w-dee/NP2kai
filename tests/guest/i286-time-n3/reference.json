@@ -1,0 +1,14 @@
+{
+  "image_bytes": 1261568,
+  "image_sha256": "db11ea6feaf6b8e9791bb1cf71b93c1a84a0ae25bacff470f7f612a54c83f36c",
+  "ipl_sha256": "6bc637a0a3417e382fc881cc33bf87a31a3f269ae2bc74b634dc3535c219f418",
+  "stage2_sha256": "1d594da405b6da4150a92766bbb818e54d3918ba81950a1dc09c9c6fc62f90ba",
+  "stage2_bytes": 3573,
+  "stage2_sectors": 4,
+  "payload_sha256": "4616f4298b080633a415352f5ce1374b35b74e176697e957c74e198946f2e8b4",
+  "sector_crc32": [
+    "b7f50855",
+    "77ec1d36"
+  ],
+  "nasm_version": "NASM version 2.16.01"
+}
