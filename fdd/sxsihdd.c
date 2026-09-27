@@ -3,6 +3,7 @@
 #include	<dosio.h>
 #include	<sysmng.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<fdd/sxsi.h>
 #ifdef SUPPORT_VPCVHD
@@ -59,7 +60,7 @@ static REG8 hdd_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size) {
 	}
 	while(size) {
 		rsize = MIN(size, sxsi->size);
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 		if (file_read(fh, buf, rsize) != rsize) {
 			return(0xd0);
 		}
@@ -89,7 +90,7 @@ static REG8 hdd_write(SXSIDEV sxsi, FILEPOS pos, const UINT8 *buf, UINT size) {
 	}
 	while(size) {
 		wsize = MIN(size, sxsi->size);
-		CPU_REMCLOCK -= wsize;
+		legacy_cpu_charge(wsize);
 		if (file_write(fh, buf, wsize) != wsize) {
 			return(0x70);
 		}
@@ -126,7 +127,7 @@ static REG8 hdd_format(SXSIDEV sxsi, FILEPOS pos) {
 		while(size) {
 			wsize = MIN(size, sizeof(work));
 			size -= wsize;
-			CPU_REMCLOCK -= wsize;
+			legacy_cpu_charge(wsize);
 			if (file_write(fh, work, wsize) != wsize) {
 				return(0x70);
 			}

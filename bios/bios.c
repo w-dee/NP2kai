@@ -9,6 +9,7 @@
 #include <bios/sxsibios.h>
 #include <common/strres.h>
 #include <cpucore.h>
+#include <legacycpu.h>
 #include <pccore.h>
 #include <cbus/cbuspnp.h>
 #include <io/iocore.h>
@@ -1016,12 +1017,12 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 			return(1);
 
 		case BIOS_BASE + BIOSOFST_09:
-			CPU_REMCLOCK -= 500;
+			legacy_cpu_charge(500);
 			bios0x09();
 			return(1);
 
 		case BIOS_BASE + BIOSOFST_0c:
-			CPU_REMCLOCK -= 500;
+			legacy_cpu_charge(500);
 			bios0x0c();
 			return(1);
 			
@@ -1032,7 +1033,7 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 			if (!npdisp.active)
 #endif
 			{
-				CPU_REMCLOCK -= 500;
+				legacy_cpu_charge(500);
 				TRACEOUT(("VGA INT: AH=%02x, AL=%02x", CPU_AH, CPU_AL));
 				switch (CPU_AH) {
 				case 0x00:
@@ -1075,17 +1076,17 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 #endif
 
 		case BIOS_BASE + BIOSOFST_12:
-			CPU_REMCLOCK -= 500;
+			legacy_cpu_charge(500);
 			bios0x12();
 			return(1);
 
 		case BIOS_BASE + BIOSOFST_13:
-			CPU_REMCLOCK -= 500;
+			legacy_cpu_charge(500);
 			bios0x13();
 			return(1);
 
 		case BIOS_BASE + BIOSOFST_18:
-			CPU_REMCLOCK -= 200;
+			legacy_cpu_charge(200);
 #if defined(BIOS_IO_EMULATION)
 			oldEIP = CPU_EIP;
 			biosioemu.count = 0; 
@@ -1110,17 +1111,17 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 #endif
 
 		case BIOS_BASE + BIOSOFST_19:
-			CPU_REMCLOCK -= 200;
+			legacy_cpu_charge(200);
 			bios0x19();
 			return(1);
 
 		case BIOS_BASE + BIOSOFST_CMT:
-			CPU_REMCLOCK -= 200;
+			legacy_cpu_charge(200);
 			bios0x1a_cmt();
 			return(0);											// return(1);
 
 		case BIOS_BASE + BIOSOFST_PRT:
-			CPU_REMCLOCK -= 200;
+			legacy_cpu_charge(200);
 #if defined(SUPPORT_PCI)
 			if(CPU_AH == 0xb1){
 				bios0x1a_pci();
@@ -1135,7 +1136,7 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 
 		case BIOS_BASE + BIOSOFST_1b:
 			CPU_STI;
-			CPU_REMCLOCK -= 200;
+			legacy_cpu_charge(200);
 #if defined(BIOS_IO_EMULATION)
 			oldEIP = CPU_EIP;
 			biosioemu.count = 0;
@@ -1160,7 +1161,7 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 #endif
 
 		case BIOS_BASE + BIOSOFST_1c:
-			CPU_REMCLOCK -= 200;
+			legacy_cpu_charge(200);
 #if defined(BIOS_IO_EMULATION)
 			oldEIP = CPU_EIP;
 			biosioemu.count = 0;
@@ -1185,7 +1186,7 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 #endif
 
 		case BIOS_BASE + BIOSOFST_1f:
-			CPU_REMCLOCK -= 200;
+			legacy_cpu_charge(200);
 			bios0x1f();
 			return(1);
 
@@ -1194,7 +1195,7 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 			return(bios0x1b_wait());								// ver0.78
 
 		case 0xfffe8:					// ブートストラップロード
-			CPU_REMCLOCK -= 2000;
+			legacy_cpu_charge(2000);
 			sxsi_workaround_bootwait = SXSI_WORKAROUND_BOOTWAIT;
 			bootseg = bootstrapload();
 			if (bootseg) {
@@ -1206,13 +1207,13 @@ UINT MEMCALL biosfunc(UINT32 adrs) {
 			return(0);
 
 		case 0xfffec:
-			CPU_REMCLOCK -= 2000;
+			legacy_cpu_charge(2000);
 			bootstrapload();
 			return(0);
 	}
 
 	if ((adrs >= 0xf9950) && (adrs <= 0x0f9990) && (!(adrs & 3))) {
-		CPU_REMCLOCK -= 500;
+		legacy_cpu_charge(500);
 		bios_lio((REG8)((adrs - 0xf9950) >> 2));
 	}
 	else if (adrs == 0xf9994) {
@@ -1231,7 +1232,7 @@ UINT MEMCALL bios32func(UINT32 adrs) {
 	
 	// アドレスがBIOS32 Entry Pointなら処理
 	if (pcidev.bios32entrypoint && adrs == pcidev.bios32entrypoint) {
-		CPU_REMCLOCK -= 200;
+		legacy_cpu_charge(200);
 		bios0x1a_pci_part(1);
 	}
 	return(0);

@@ -14,6 +14,7 @@
 #include <timemng.h>
 #include <cpucore.h>
 #include <pccore.h>
+#include <legacycpu.h>
 #include <io/iocore.h>
 #include <io/gdc_sub.h>
 #include <cbus/cbuscore.h>
@@ -470,7 +471,7 @@ static void pccore_set(const NP2CFG *pConfig) {
   }
   pccore.multiple = multiple;
   pccore.maxmultiple = pccore.multiple;
-  pccore.realclock = pccore.baseclock * multiple;
+  pccore.realclock = legacy_configured_rate(pccore.baseclock, multiple);
 
   // HDDの接続 (I/Oの使用状態が変わるので..
   if (pConfig->dipsw[1] & 0x20) {
@@ -1802,7 +1803,7 @@ static void pccore_asynccpu() {
             } else {
               pccore.multiple = 1;
             }
-            pccore.realclock = pccore.baseclock * pccore.multiple;
+            pccore.realclock = legacy_configured_rate(pccore.baseclock, pccore.multiple);
             pcm86_changeclock(oldmultiple);
             nevent_changeclock(oldmultiple, pccore.multiple);
 						S98_changeclock();
@@ -1845,7 +1846,7 @@ static void pccore_asynccpu() {
               } else {
                 pccore.multiple = pccore.maxmultiple;
               }
-              pccore.realclock = pccore.baseclock * pccore.multiple;
+              pccore.realclock = legacy_configured_rate(pccore.baseclock, pccore.multiple);
               pcm86_changeclock(oldmultiple);
               nevent_changeclock(oldmultiple, pccore.multiple);
 						S98_changeclock();
@@ -1974,7 +1975,7 @@ void pccore_exec(BOOL draw) {
 #endif
     {
 #if !defined(SINGLESTEPONLY)
-      if (CPU_REMCLOCK > 0) {
+      if (legacy_cpu_remaining() > 0) {
         if (!(CPU_TYPE & CPUTYPE_V30)) {
           CPU_EXEC();
         } else {
@@ -1982,7 +1983,7 @@ void pccore_exec(BOOL draw) {
         }
       }
 #else
-      while (CPU_REMCLOCK > 0) {
+      while (legacy_cpu_remaining() > 0) {
         CPU_STEPEXEC();
       }
 #endif

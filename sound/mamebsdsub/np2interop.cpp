@@ -8,6 +8,7 @@
 #include "compiler.h"
 #include "pccore.h"
 #include "cpucore.h"
+#include <legacycpu.h>
 #include "ymfm_opl.h"
 #include "np2interop.h"
 
@@ -100,7 +101,7 @@ int YMF262Write(void* chipptr, int a, int v)
 				if (!(chipbsd->m_data.reg_timerctrl & 0x01) && (v & 0x01))
 				{
 					// Timer1 start
-					chipbsd->m_data.timer_startclock[0] = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+					chipbsd->m_data.timer_startclock[0] = legacy_cpu_device_now();
 					chipbsd->m_data.timer_valid[0] = true;
 					chipbsd->m_data.timer_intr[0] = false;
 				}
@@ -113,7 +114,7 @@ int YMF262Write(void* chipptr, int a, int v)
 				if (!(chipbsd->m_data.reg_timerctrl & 0x02) && (v & 0x02))
 				{
 					// Timer2 start
-					chipbsd->m_data.timer_startclock[1] = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+					chipbsd->m_data.timer_startclock[1] = legacy_cpu_device_now();
 					chipbsd->m_data.timer_valid[1] = true;
 					chipbsd->m_data.timer_intr[1] = false;
 				}
@@ -151,7 +152,7 @@ unsigned char YMF262Read(void* chipptr, int a)
 			// 再判定不要 割り込みも立てておく
 			tmr |= 0xc0;
 		}
-		else if (CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK - chipbsd->m_data.timer_startclock[0] >= pccore.realclock / 1000 * (256 - chipbsd->m_data.reg_timer1) * 808 / 10000)
+		else if (legacy_cpu_device_now() - chipbsd->m_data.timer_startclock[0] >= pccore.realclock / 1000 * (256 - chipbsd->m_data.reg_timer1) * 808 / 10000)
 		{
 			// 時間経過した　分解能は 80.8 usec
 			chipbsd->m_data.timer_intr[0] = true;
@@ -165,7 +166,7 @@ unsigned char YMF262Read(void* chipptr, int a)
 			// 再判定不要 割り込みも立てておく
 			tmr |= 0xa0;
 		}
-		else if (CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK - chipbsd->m_data.timer_startclock[1] >= pccore.realclock / 1000 * (256 - chipbsd->m_data.reg_timer2) * 3231 / 10000)
+		else if (legacy_cpu_device_now() - chipbsd->m_data.timer_startclock[1] >= pccore.realclock / 1000 * (256 - chipbsd->m_data.reg_timer2) * 3231 / 10000)
 		{
 			// 時間経過した　分解能は 323.1 usec
 			chipbsd->m_data.timer_intr[1] = true;

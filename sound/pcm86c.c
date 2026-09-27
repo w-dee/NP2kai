@@ -7,6 +7,7 @@
 #include <sound/pcm86.h>
 #include <pccore.h>
 #include <cpucore.h>
+#include <legacycpu.h>
 #include <io/iocore.h>
 #include <sound/fmboard.h>
 #include <sound/sndmtcs.h>
@@ -302,7 +303,7 @@ void pcm86_changeclock(UINT oldmultiple)
 			newstepclock /= pcm86->rateval;
 			newstepclock *= ((UINT64)pccore.multiple << 3);
 			pastCycle = (UINT64)UINT_MAX << 6;
-			cur = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+			cur = legacy_cpu_device_now();
 			cur <<= 6;
 			past = (cur + pastCycle - pcm86->lastclock) % pastCycle;
 			if (past > pastCycle / 2)
@@ -350,7 +351,7 @@ void SOUNDCALL pcm86gen_checkbuf(PCM86 pcm86, UINT nCount)
 	UINT64	curClock;
 	SINT32	flagStep;
 	static UINT32	lastClock = 0;
-	curClock = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+	curClock = legacy_cpu_device_now();
 	if (lastClock == 0)
 	{
 		flagStep = 0;
@@ -362,7 +363,7 @@ void SOUNDCALL pcm86gen_checkbuf(PCM86 pcm86, UINT nCount)
 	//TRACEOUT(("FS %d", flagStep));
 
 	pastCycle = (UINT64)UINT_MAX << 6;
-	cur = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+	cur = legacy_cpu_device_now();
 	cur <<= 6;
 	past = (cur + pastCycle - pcm86->lastclock) % pastCycle;
 	if (past > pastCycle / 2)
@@ -465,7 +466,7 @@ void SOUNDCALL pcm86gen_checkbuf(PCM86 pcm86, UINT nCount)
 BOOL pcm86gen_intrq(int fromFMTimer)
 {
 	PCM86 pcm86 = &g_pcm86;
-	UINT64 curclk = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+	UINT64 curclk = legacy_cpu_device_now();
 	// WORKAROUND: データ書き込みから割り込み発生までの時間が短すぎると不具合が起こる場合があるのでわざと遅延
 	// XXX: 本当は循環しているのでg_pcm86.lastclockforwaitセットから時間が経ちすぎると不味い
 	// しかし仮に500MHzとしたときUINT64が1周するのは40万日くらいなので事実上問題ない

@@ -2,6 +2,7 @@
 #include	<dosio.h>
 #include	<common/textfile.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<fdd/sxsi.h>
 #include	"cddfile.h"
 
@@ -378,7 +379,7 @@ REG8 sec2048_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size) {
 
 	while(size) {
 		rsize = MIN(size, 2048);
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 		if (file_read(fh, buf, rsize) != rsize) {
 			return(0xd0);
 		}
@@ -413,7 +414,7 @@ REG8 sec2352_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size) {
 			return(0xd0);
 		}
 		rsize = MIN(size, 2048);
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 		if (file_read(fh, buf, rsize) != rsize) {
 			return(0xd0);
 		}
@@ -461,7 +462,7 @@ REG8 sec2352_read_with_ecc(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size) {
 			return(0xd0);
 		}
 		rsize = 2352;
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 		if (file_read(fh, bufdata, rsize) != rsize) {
 			return(0xd0);
 		}
@@ -510,7 +511,7 @@ REG8 sec2448_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size) {
 			return(0xd0);
 		}
 		rsize = MIN(size, 2048);
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 		if (file_read(fh, buf, rsize) != rsize) {
 			return(0xd0);
 		}
@@ -562,7 +563,7 @@ REG8 sec_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size) {
 			return(0xd0);
 		}
 		rsize = MIN(size, 2048);
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 		if (file_read(fh, buf, rsize) != rsize) {
 			return(0xd0);
 		}

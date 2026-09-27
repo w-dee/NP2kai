@@ -230,6 +230,7 @@ UINT sxsicd_readraw_forhash(SXSIDEV sxsi, UINT uSecNo, UINT8 *pu8Buf, UINT* puSi
 #else /* SUPPORT_KAI_IMAGES */
 // 旧処理もとりあえず残しておく
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 
 static const UINT8 cd001[7] = {0x01,'C','D','0','0','1',0x01};
@@ -294,7 +295,7 @@ static REG8 sec2048_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size) {
 	}
 	while(size) {
 		rsize = MIN(size, 2048);
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 		if (file_read(fh, buf, rsize) != rsize) {
 			return(0xd0);
 		}
@@ -357,7 +358,7 @@ static REG8 sec2352_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size) {
 			return(0xd0);
 		}
 		rsize = MIN(size, 2048);
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 		if (file_read(fh, buf, rsize) != rsize) {
 			return(0xd0);
 		}

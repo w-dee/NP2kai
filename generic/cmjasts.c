@@ -1,6 +1,7 @@
 #include	<compiler.h>
 #include	<commng.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<sound/sound.h>
 #include	<generic/cmjasts.h>
 
@@ -41,7 +42,7 @@ static UINT jswrite(COMMNG self, UINT8 data) {
 	if (js->events < JSEVENTS) {
 		JSEVT *e;
 		e = js->event + js->events;
-		e->clock = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK -
+		e->clock = legacy_cpu_device_now() -
 														soundcfg.lastclock;
 		e->pcm = pcm;
 		js->events++;

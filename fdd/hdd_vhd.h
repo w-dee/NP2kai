@@ -11,6 +11,7 @@
 //#include <dosio.h>
 //#include <sysmng.h>
 //#include <cpucore.h>
+#include <legacycpu.h>
 //#include <pccore.h>
 //#include <fdd/sxsi.h>
 //#include "hdd_vpc.h"
@@ -855,7 +856,7 @@ static REG8 vpcvhd_dynamic_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size
 	if (vhd == NULL)
 		return 0x60;
 	byte_pos = (UINT64)pos * sxsi->size;
-	CPU_REMCLOCK -= size;
+	legacy_cpu_charge(size);
 	return (vpcvhd_dynamic_read_bytes(vhd, byte_pos, buf, size) == SUCCESS) ? 0x00 : 0xd0;
 }
 
@@ -872,7 +873,7 @@ static REG8 vpcvhd_dynamic_write(SXSIDEV sxsi, FILEPOS pos, const UINT8 *buf, UI
 	if (vhd == NULL)
 		return 0x60;
 	byte_pos = (UINT64)pos * sxsi->size;
-	CPU_REMCLOCK -= size;
+	legacy_cpu_charge(size);
 	return (vpcvhd_dynamic_write_bytes(vhd, byte_pos, buf, size) == SUCCESS) ? 0x00 : 0x70;
 }
 

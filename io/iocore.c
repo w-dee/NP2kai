@@ -1,5 +1,6 @@
 #include	<compiler.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
 #include	<cbus/cbuscore.h>
@@ -642,7 +643,7 @@ void IOOUTCALL iocore_out8(UINT port, REG8 dat) {
 	IOFUNC	iof;
 
 //	TRACEOUT(("iocore_out8(%.2x, %.2x)", port, dat));
-	CPU_REMCLOCK -= iocore.busclock;
+	legacy_cpu_charge(iocore.busclock);
 	iof = iocore.base[(port >> 8) & 0xff];
 	iof->ioout[port & 0xff](port, dat);
 }
@@ -652,7 +653,7 @@ REG8 IOINPCALL iocore_inp8(UINT port) {
 	IOFUNC	iof;
 	REG8	ret;
 	
-	CPU_REMCLOCK -= iocore.busclock;
+	legacy_cpu_charge(iocore.busclock);
 	iof = iocore.base[(port >> 8) & 0xff];
 	ret = iof->ioinp[port & 0xff](port);
 //	TRACEOUT(("iocore_inp8(%.2x) -> %.2x", port, ret));
@@ -664,7 +665,7 @@ void IOOUTCALL iocore_out16(UINT port, REG16 dat) {
 	IOFUNC	iof;
 
 //	TRACEOUT(("iocore_out16(%.4x, %.4x)", port, dat));
-	CPU_REMCLOCK -= iocore.busclock;
+	legacy_cpu_charge(iocore.busclock);
 #if defined(SUPPORT_PC9821)&&defined(SUPPORT_PCI)
 	if (0x0cfc <= port && port <= 0x0cff) {
 		pcidev_w16_0xcfc(port, dat);
@@ -748,7 +749,7 @@ REG16 IOINPCALL iocore_inp16(UINT port) {
 	IOFUNC	iof;
 	REG8	ret;
 
-	CPU_REMCLOCK -= iocore.busclock;
+	legacy_cpu_charge(iocore.busclock);
 #if defined(SUPPORT_PC9821)&&defined(SUPPORT_PCI)
 	if (0x0cfc <= port && port <= 0x0cff) {
 		return(pcidev_r16_0xcfc(port));
@@ -824,7 +825,7 @@ REG16 IOINPCALL iocore_inp16(UINT port) {
 
 void IOOUTCALL iocore_out32(UINT port, UINT32 dat) {
 
-	CPU_REMCLOCK -= iocore.busclock;
+	legacy_cpu_charge(iocore.busclock);
 #if defined(SUPPORT_PC9821)
 	if ((port & 0xfffb) == 0x0cf8) {
 		pcidev_w32(port, dat);
@@ -856,7 +857,7 @@ UINT32 IOINPCALL iocore_inp32(UINT port) {
 
 	UINT32	ret;
 
-	CPU_REMCLOCK -= iocore.busclock;
+	legacy_cpu_charge(iocore.busclock);
 #if defined(SUPPORT_PC9821)
 	if ((port & 0xfffb) == 0x0cf8) {
 		return(pcidev_r32(port));

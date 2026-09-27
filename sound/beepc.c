@@ -1,6 +1,7 @@
 #include	<compiler.h>
 #include	<dosio.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
 #include	<sound/sound.h>
@@ -112,7 +113,7 @@ static void beep_eventset(void) {
 	if (g_beep.enable != enable) {
 #if defined(BEEPLOG)
 		UINT32	tmp;
-		tmp = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+		tmp = legacy_cpu_device_now();
 		if (enable) {
 			tmp |= 0x80000000;
 		}
@@ -129,7 +130,7 @@ static void beep_eventset(void) {
 		}
 		g_beep.enable = enable;
 		if (g_beep.events < BEEPEVENT_MAX) {
-			clk = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+			clk = legacy_cpu_device_now();
 			evt = g_beep.event + g_beep.events;
 			g_beep.events++;
 			evt->clock = (clk - g_beep.clock) * beepcfg.samplebase;

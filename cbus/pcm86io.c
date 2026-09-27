@@ -1,5 +1,6 @@
 #include	<compiler.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
 #include	<cbus/pcm86io.h>
@@ -58,7 +59,7 @@ void IOOUTCALL pcm86_oa466(UINT port, REG8 val) {
 void IOOUTCALL pcm86_oa468(UINT port, REG8 val) {
 
 	REG8	xchgbit;
-	UINT64 curclk = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+	UINT64 curclk = legacy_cpu_device_now();
 
 //	TRACEOUT(("86pcm out %.4x %.2x", port, val));
 	sound_sync();
@@ -76,7 +77,7 @@ void IOOUTCALL pcm86_oa468(UINT port, REG8 val) {
 			g_pcm86.readpos = 0;
 			g_pcm86.realbuf = 0;
 			g_pcm86.virbuf = 0;
-			g_pcm86.lastclock = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+			g_pcm86.lastclock = legacy_cpu_device_now();
 			g_pcm86.lastclock <<= 6;
 			g_pcm86.lastclockforwait = curclk;
 #if defined(SUPPORT_MULTITHREAD)
@@ -90,7 +91,7 @@ void IOOUTCALL pcm86_oa468(UINT port, REG8 val) {
 		g_pcm86.irqflag = 0;
 		if (g_pcm86.virbuf == 0) {
 			// WORKAROUND: 割り込みクリア時にバッファが空の状態だったら、長めの割り込み待ちを入れる
-			g_pcm86.lastclockforwait = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+			g_pcm86.lastclockforwait = legacy_cpu_device_now();
 		}
 	}
 	// 割り込み条件を満たしていれば強制的に割り込む　ポリスノーツ用
@@ -106,7 +107,7 @@ void IOOUTCALL pcm86_oa468(UINT port, REG8 val) {
 	}
 	g_pcm86.fifo = val;
 	if ((xchgbit & 0x80) && (val & 0x80)) {
-		g_pcm86.lastclock = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+		g_pcm86.lastclock = legacy_cpu_device_now();
 		g_pcm86.lastclock <<= 6;
 	}
 	if (g_pcm86.reqirq)
@@ -189,7 +190,7 @@ void IOOUTCALL pcm86_oa46c(UINT port, REG8 val) {
 	if (g_pcm86.virbuf > g_pcm86.fifosize * 2 || g_pcm86.virbuf >= PCM86_LOGICALBUF) {
 		addClock = datawriteirqwait;
 	}
-	g_pcm86.lastclockforwait = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK + addClock;
+	g_pcm86.lastclockforwait = legacy_cpu_device_now() + addClock;
 #else
 	if (g_pcm86.virbuf < PCM86_LOGICALBUF) {
 		g_pcm86.virbuf++;
@@ -230,7 +231,7 @@ REG8 IOINPCALL pcm86_ia466(UINT port) {
 	stepclock = g_pcm86.stepclock;
 
 	pastCycle = (UINT64)UINT_MAX << 6;
-	cur = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+	cur = legacy_cpu_device_now();
 	cur <<= 6;
 	past = (cur + pastCycle - g_pcm86.lastclock) % pastCycle;
 	if (past > pastCycle / 2)

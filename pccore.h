@@ -379,9 +379,11 @@ struct tagNP2Config
 };
 typedef struct tagNP2Config  NP2CFG;		/*!< The define of config */
 
+/* Configured conversion domain, not the backend execution-slice ledger.
+ * These fields and their layout are also used by existing save states. */
 typedef struct {
-	UINT32	baseclock;
-	UINT	multiple;
+	UINT32	baseclock; /* configured base oscillator Hz */
+	UINT	multiple;  /* dimensionless legacy cycles per base-clock cycle */
 
 	UINT8	cpumode;
 	UINT8	model;
@@ -397,9 +399,9 @@ typedef struct {
 	SOUNDID sound;
 	UINT32	device;
 
-	UINT32	realclock;
+	UINT32	realclock; /* baseclock * multiple: legacy cycles/virtual second */
 
-	UINT	maxmultiple;
+	UINT	maxmultiple; /* configured ceiling; existing TSC mapping retained */
 } PCCORE;
 
 enum {

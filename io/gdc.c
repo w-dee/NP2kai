@@ -1,6 +1,7 @@
 #include	<compiler.h>
 #include	<scrnmng.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
 #include	"gdc_cmd.tbl"
@@ -101,7 +102,7 @@ void gdc_setanalogpal(int color, int rgb, REG8 value) {
 			if (!gdc.vsync) {
 				event = palevent.event + palevent.events;
 				event->clock = g_nevent.item[NEVENT_FLAMES].clock -
-											(CPU_BASECLOCK - CPU_REMCLOCK);
+											(legacy_cpu_slice_elapsed());
 				event->color = (UINT16)((color * sizeof(RGB32)) + rgb);
 				event->value = (UINT8)value;
 				palevent.events++;
@@ -673,7 +674,7 @@ static REG8 IOINPCALL gdc_i60(UINT port) {
 	}
 #endif
 #ifdef TURE_SYNC				// クロックイベントの誤差修正
-	if (g_nevent.item[NEVENT_FLAMES].clock < (CPU_BASECLOCK - CPU_REMCLOCK)) {
+	if (g_nevent.item[NEVENT_FLAMES].clock < (legacy_cpu_slice_elapsed())) {
 		ret ^= 0x20;
 	}
 #endif
@@ -802,7 +803,7 @@ static REG8 IOINPCALL gdc_ia0(UINT port) {
 	}
 #endif
 #ifdef TURE_SYNC				// クロックイベントの誤差修正
-	if (g_nevent.item[NEVENT_FLAMES].clock < (CPU_BASECLOCK - CPU_REMCLOCK)) {
+	if (g_nevent.item[NEVENT_FLAMES].clock < (legacy_cpu_slice_elapsed())) {
 		ret ^= 0x20;
 	}
 #endif

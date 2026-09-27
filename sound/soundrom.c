@@ -11,6 +11,7 @@
 
 #include "compiler.h"
 #include "cpucore.h"
+#include <legacycpu.h>
 #include "pccore.h"
 #include "dosio.h"
 #include "soundrom.h"
@@ -1985,7 +1986,7 @@ UINT soundrom_biosfunc(UINT32 adrs)
 	if (!soundrom_isbiosaddr(adrs)) {
 		return 0;
 	}
-	CPU_REMCLOCK -= 200;
+	legacy_cpu_charge(200);
 
 	/* オプションROM初期化エントリでは、公開Sound BIOS入口をINT D2hへ登録する。 */
 	if (adrs == soundrom.address + SB_INIT_OFF) {

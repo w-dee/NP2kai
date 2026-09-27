@@ -6,6 +6,7 @@
 #include <compiler.h>
 #include <sound/sound.h>
 #include <cpucore.h>
+#include <legacycpu.h>
 #include <pccore.h>
 #include <io/iocore.h>
 #include "sndcsec.h"
@@ -281,7 +282,7 @@ void sound_reset(void) {
 	if (sndstream.buffer) {
 		soundmng_reset();
 		streamreset();
-		soundcfg.lastclock = CPU_CLOCK;
+		soundcfg.lastclock = legacy_cpu_committed_cycles();
 		beep_eventreset();
 	}
 }
@@ -310,7 +311,7 @@ void sound_changeclock(void) {
 	soundcfg.hzbase = hz;
 	soundcfg.clockbase = clk;
 	soundcfg.minclock = 2 * clk / hz;
-	soundcfg.lastclock = CPU_CLOCK;
+	soundcfg.lastclock = legacy_cpu_committed_cycles();
 }
 
 void sound_streamregist(void *hdl, SOUNDCB cbfn) {
@@ -338,7 +339,7 @@ void sound_sync(void)
 		return;
 	}
 
-	length = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK - soundcfg.lastclock;
+	length = legacy_cpu_device_now() - soundcfg.lastclock;
 	if (length < soundcfg.minclock)
 	{
 		return;
@@ -406,7 +407,7 @@ const SINT32 *ret;
 #endif	/* defined(SUPPORT_WAVEREC) */
 		{
 			streamprepare(sndstream.remain - sndstream.reserve);
-			soundcfg.lastclock = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+			soundcfg.lastclock = legacy_cpu_device_now();
 			beep_eventreset();
 		}
 	}

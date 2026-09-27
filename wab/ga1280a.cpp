@@ -26,6 +26,7 @@ extern "C" {
 #endif
 #include    "dosio.h"
 #include    "cpucore.h"
+#include <legacycpu.h>
 #include    "cpumem.h"
 #include    "iocore.h"
 #include    "soundmng.h"
@@ -1357,7 +1358,7 @@ static bool vram_read_plane_byte(int plane, UINT32 line, UINT32 byte_in_line, UI
         if (x >= pixel_map_width()) break;
         if (read_packed_pixel(x, line) & plane_bit) result |= (UINT8)(0x80 >> bit_index);
     }
-    CPU_REMCLOCK -= 8 * GA1280A_MEMWAIT;
+    legacy_cpu_charge(8 * GA1280A_MEMWAIT);
     *ret = result;
     return true;
 }
@@ -1378,7 +1379,7 @@ static void vram_write_plane_byte_masked(int plane, UINT32 line, UINT32 byte_in_
         else pixel &= ~plane_bit;
         write_packed_pixel(x, line, pixel);
     }
-    CPU_REMCLOCK -= 8 * GA1280A_MEMWAIT;
+    legacy_cpu_charge(8 * GA1280A_MEMWAIT);
 }
 
 static bool uses_packed_host_pixels(void)
@@ -1542,7 +1543,7 @@ static void host_window_rotate_word(UINT32 offset)
         vram_write_plane_byte_masked(plane, line, byte_in_line, (UINT8)rotated, low_mask);
         vram_write_plane_byte_masked(plane, line, byte_in_line + 1, (UINT8)(rotated >> 8), high_mask);
     }
-    CPU_REMCLOCK -= active_plane_count() * GA1280A_MEMWAIT;
+    legacy_cpu_charge(active_plane_count() * GA1280A_MEMWAIT);
 }
 
 static void host_window_write_raw(UINT32 line, UINT32 byte_in_line, UINT8 value, UINT8 bit_mask)
@@ -1552,7 +1553,7 @@ static void host_window_write_raw(UINT32 line, UINT32 byte_in_line, UINT8 value,
         if ((plane_mask & (1u << plane)) == 0) continue;
         vram_write_plane_byte_masked(plane, line, byte_in_line, value, bit_mask);
     }
-    CPU_REMCLOCK -= active_plane_count() * GA1280A_MEMWAIT;
+    legacy_cpu_charge(active_plane_count() * GA1280A_MEMWAIT);
 }
 
 static void host_window_write_color_expand(UINT32 line, UINT32 byte_in_line, UINT8 source_bits, UINT8 bit_mask)
@@ -1565,7 +1566,7 @@ static void host_window_write_color_expand(UINT32 line, UINT32 byte_in_line, UIN
         UINT8 mix = (source_bits & bit) ? s_ga.fmix : s_ga.bmix;
         write_pixel_rop(x_base + bit_index, line, color, mix);
     }
-    CPU_REMCLOCK -= 8 * GA1280A_MEMWAIT;
+    legacy_cpu_charge(8 * GA1280A_MEMWAIT);
 }
 
 static UINT8 host_window_read_pixel_mask(UINT32 line, UINT32 byte_in_line)
@@ -1582,7 +1583,7 @@ static UINT8 host_window_read_pixel_mask(UINT32 line, UINT32 byte_in_line)
         vram_read_plane_byte(plane, line, byte_in_line, &b);
         value |= b;
     }
-    CPU_REMCLOCK -= active_plane_count() * GA1280A_MEMWAIT;
+    legacy_cpu_charge(active_plane_count() * GA1280A_MEMWAIT);
     return value;
 }
 
@@ -1596,7 +1597,7 @@ static void host_window_write_pixel_mask(UINT32 line, UINT32 byte_in_line, UINT8
         UINT8 value = (color & (1u << plane)) ? 0xff : 0;
         vram_write_plane_byte_masked(plane, line, byte_in_line, value, pixel_mask);
     }
-    CPU_REMCLOCK -= active_plane_count() * GA1280A_MEMWAIT;
+    legacy_cpu_charge(active_plane_count() * GA1280A_MEMWAIT);
 }
 
 static UINT8 host_window_read(UINT32 offset)
@@ -1991,7 +1992,7 @@ static void execute_solid_rectangle_color(UINT32 color, PixelMix mix)
     for (UINT32 y = start_y; y < start_y + height; y++) {
         for (UINT32 x = start_x; x < start_x + width; x++) write_pixel_mixed(x, y, color, mix);
     }
-    CPU_REMCLOCK -= width * height * GA1280A_MEMWAIT;
+    legacy_cpu_charge(width * height * GA1280A_MEMWAIT);
 }
 
 static void execute_solid_rectangle(void)
@@ -2006,7 +2007,7 @@ static void execute_rop_solid_rectangle_foreground(void)
     for (UINT32 y = s_ga.dsty; y < (UINT32)s_ga.dsty + height; y++) {
         for (UINT32 x = s_ga.dstx; x < (UINT32)s_ga.dstx + width; x++) write_pixel_rop(x, y, s_ga.fcol, s_ga.fmix);
     }
-    CPU_REMCLOCK -= width * height * GA1280A_MEMWAIT;
+    legacy_cpu_charge(width * height * GA1280A_MEMWAIT);
 }
 
 static void execute_rop_rectangle_foreground(void)
@@ -2021,7 +2022,7 @@ static void execute_rop_rectangle_foreground(void)
             write_pixel_rop((UINT32)s_ga.dstx + col, (UINT32)s_ga.dsty + row, bit ? s_ga.fcol : s_ga.bcol, bit ? s_ga.fmix : s_ga.bmix);
         }
     }
-    CPU_REMCLOCK -= width * height * GA1280A_MEMWAIT;
+    legacy_cpu_charge(width * height * GA1280A_MEMWAIT);
 }
 
 static void execute_dstphase_rop_rectangle_foreground(void)
@@ -2051,7 +2052,7 @@ static void execute_copy_rectangle(UINT8 direction)
             write_pixel_mixed_signed(dx, dy, read_pixel_color_signed(sx, sy), PIXEL_MIX_SOURCE);
         }
     }
-    CPU_REMCLOCK -= width * height * GA1280A_MEMWAIT;
+    legacy_cpu_charge(width * height * GA1280A_MEMWAIT);
 }
 
 static void execute_copy_rectangle_with_mix(UINT8 direction)
@@ -2067,7 +2068,7 @@ static void execute_copy_rectangle_with_mix(UINT8 direction)
             write_pixel_rop_signed(dx, dy, read_pixel_color_signed(sx, sy), s_ga.fmix);
         }
     }
-    CPU_REMCLOCK -= width * height * GA1280A_MEMWAIT;
+    legacy_cpu_charge(width * height * GA1280A_MEMWAIT);
 }
 
 static bool is_shadow_glyph_mask_copy(void)
@@ -2113,7 +2114,7 @@ static void execute_hga_copy_rectangle_alt_with_mix(UINT8 direction)
             write_pixel_rop_signed(dx, dy, src, (src & mask_for_active_color()) ? (16 - s_ga.fmix) : (16 - s_ga.bmix));
         }
     }
-    CPU_REMCLOCK -= width * height * GA1280A_MEMWAIT;
+    legacy_cpu_charge(width * height * GA1280A_MEMWAIT);
 }
 
 static void execute_shadow_glyph_mask_copy_with_mix(UINT8 direction)
@@ -2137,7 +2138,7 @@ static void execute_shadow_glyph_mask_copy_with_mix(UINT8 direction)
             }
         }
     }
-    CPU_REMCLOCK -= width * height * GA1280A_MEMWAIT;
+    legacy_cpu_charge(width * height * GA1280A_MEMWAIT);
 }
 
 static void execute_tiled_rectangle(void)
@@ -2169,7 +2170,7 @@ static void execute_tiled_rectangle(void)
                 PIXEL_MIX_SOURCE);
         }
     }
-    CPU_REMCLOCK -= width * height * GA1280A_MEMWAIT;
+    legacy_cpu_charge(width * height * GA1280A_MEMWAIT);
 }
 
 static void compute_line_points(UINT8 direction)
@@ -2205,7 +2206,7 @@ static void compute_line_points(UINT8 direction)
         else x += x_step;
     }
 
-    CPU_REMCLOCK -= (major_len + 1) * GA1280A_MEMWAIT;
+    legacy_cpu_charge((major_len + 1) * GA1280A_MEMWAIT);
 }
 
 static void execute_solid_line(UINT8 direction)
@@ -2213,7 +2214,7 @@ static void execute_solid_line(UINT8 direction)
     compute_line_points(direction);
     PixelMix mix = foreground_mix();
     for (size_t i = 0; i < s_line_points.size(); i++) write_pixel_mixed_signed(s_line_points[i].x, s_line_points[i].y, s_ga.col, mix);
-    CPU_REMCLOCK -= s_line_points.size() * GA1280A_MEMWAIT_LINE;
+    legacy_cpu_charge(s_line_points.size() * GA1280A_MEMWAIT_LINE);
 }
 
 static void execute_styled_line(UINT8 direction)
@@ -2223,7 +2224,7 @@ static void execute_styled_line(UINT8 direction)
     for (size_t i = 0; i < s_line_points.size(); i++) {
         if (line_style_bit(s_ga.lins, s_line_points[i].step)) write_pixel_mixed_signed(s_line_points[i].x, s_line_points[i].y, s_ga.col, mix);
     }
-    CPU_REMCLOCK -= s_line_points.size() * GA1280A_MEMWAIT_LINE;
+    legacy_cpu_charge(s_line_points.size() * GA1280A_MEMWAIT_LINE);
 }
 
 static void execute_rop_line(UINT8 direction)
@@ -2233,7 +2234,7 @@ static void execute_rop_line(UINT8 direction)
         if (line_style_bit(s_ga.lins, s_line_points[i].step)) write_pixel_rop_signed(s_line_points[i].x, s_line_points[i].y, s_ga.fcol, s_ga.fmix);
         else write_pixel_rop_signed(s_line_points[i].x, s_line_points[i].y, s_ga.bcol, s_ga.bmix);
     }
-    CPU_REMCLOCK -= s_line_points.size() * GA1280A_MEMWAIT_LINE;
+    legacy_cpu_charge(s_line_points.size() * GA1280A_MEMWAIT_LINE);
 }
 
 static void execute_host_color_expand(void)

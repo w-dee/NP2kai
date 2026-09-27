@@ -16,6 +16,7 @@
 #include	"statsave.h"
 #include	"dosio.h"
 #include	"cpucore.h"
+#include <legacycpu.h>
 #include	"pccore.h"
 #include	"iocore.h"
 #include	"soundmng.h"
@@ -4937,7 +4938,7 @@ void npdisp_exec(void) {
 	}
 
 	// 例外発生せずに全部送れたらCPUクロックを進め、読み書きバッファはクリアする
-	CPU_REMCLOCK -= (npdisp_memory_getTotalReadSize() + npdisp_memory_getTotalWriteSize()) / 4; // 4byteメモリアクセスあたり1clock
+	legacy_cpu_charge((npdisp_memory_getTotalReadSize() + npdisp_memory_getTotalWriteSize()) / 4); // 4byteメモリアクセスあたり1clock
 	npdisp_memory_clearpreload();
 }
 
@@ -5123,7 +5124,7 @@ void npdisp_exec_fast(void) {
 			// 処理負荷バランス調整
 			int w = req.parameters.BitBlt.wXext < 0 ? -req.parameters.BitBlt.wXext : req.parameters.BitBlt.wXext;
 			int h = req.parameters.BitBlt.wYext < 0 ? -req.parameters.BitBlt.wYext : req.parameters.BitBlt.wYext;
-			CPU_REMCLOCK -= w * h * pccore.multiple / 8000;
+			legacy_cpu_charge(w * h * pccore.multiple / 8000);
 		}
 		break;
 	}
@@ -5157,7 +5158,7 @@ void npdisp_exec_fast(void) {
 			// 処理負荷バランス調整
 			int w = req.parameters.stretchBlt.wDestXext < 0 ? -req.parameters.stretchBlt.wDestXext : req.parameters.stretchBlt.wDestXext;
 			int h = req.parameters.stretchBlt.wDestYext < 0 ? -req.parameters.stretchBlt.wDestYext : req.parameters.stretchBlt.wDestYext;
-			CPU_REMCLOCK -= w * h * pccore.multiple / 8000;
+			legacy_cpu_charge(w * h * pccore.multiple / 8000);
 		}
 		break;
 	}
@@ -5229,7 +5230,7 @@ void npdisp_exec_fast(void) {
 
 			// 処理負荷バランス調整
 			if (req.parameters.extTextOut.wCount > 0) {
-				CPU_REMCLOCK -= (int)req.parameters.extTextOut.wCount * pccore.multiple * 10;
+				legacy_cpu_charge((int)req.parameters.extTextOut.wCount * pccore.multiple * 10);
 			}
 		}
 		break;
@@ -5673,7 +5674,7 @@ void npdisp_exec_fast(void) {
 	}
 
 	// 例外発生せずに全部送れたらCPUクロックを進め、読み書きバッファはクリアする
-	CPU_REMCLOCK -= (npdisp_memory_getTotalReadSize() + npdisp_memory_getTotalWriteSize()) / 4; // 4byteメモリアクセスあたり1clock
+	legacy_cpu_charge((npdisp_memory_getTotalReadSize() + npdisp_memory_getTotalWriteSize()) / 4); // 4byteメモリアクセスあたり1clock
 	npdisp_memory_clearpreload();
 }
 

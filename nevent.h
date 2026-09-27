@@ -5,6 +5,12 @@
 
 #pragma once
 
+/* Legacy scheduler contract: signed CPU-cycle offsets from the slice origin.
+ * ABSOLUTE is relative to the current in-slice position; RELATIVE adds to
+ * the previous deadline. Neither is host time. NEVENT owns ledger rebasing;
+ * callbacks run in the existing execution context/order, one slot per ID.
+ * Keep the serialized SINT32 clock field and all public signatures unchanged. */
+
 enum
 {
 	NEVENT_MAXCLOCK		= 0x400000,
@@ -86,7 +92,7 @@ typedef void (*NEVENTCB)(NEVENTITEM item);
 
 struct _neventitem
 {
-	SINT32		clock;
+	SINT32		clock; /* legacy deadline offset; signed past positions are valid */
 	UINT32		flag;
 	NEVENTCB	proc;
 	INTPTR		userData;

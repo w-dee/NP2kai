@@ -1,5 +1,6 @@
 #include <compiler.h>
 #include <cpucore.h>
+#include <legacycpu.h>
 #include <io/iocore.h>
 #include <keystat.h>
 #include <mousemng.h>
@@ -46,7 +47,7 @@ void mouseif_sync(void) {
   mouseif.ry = mouseif.sy;
 
 #if defined(VAEG_FIX)
-  mouseif.lastc = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+  mouseif.lastc = legacy_cpu_device_now();
 #else
   mouseif.lastc = CPU_CLOCK + CPU_BASECLOCK + CPU_REMCLOCK;
 #endif
@@ -71,7 +72,7 @@ static void calc_mousexy(void) {
   SINT32 diff;
 
 #if defined(VAEG_FIX)
-  clk = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+  clk = legacy_cpu_device_now();
 #else
   clk = CPU_CLOCK + CPU_BASECLOCK + CPU_REMCLOCK;
 #endif

@@ -9,6 +9,7 @@
 #include	<dosio.h>
 #include	<sysmng.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<fdd/sxsi.h>
 
@@ -236,7 +237,7 @@ static REG8 hdd_read(SXSIDEV sxsi, FILEPOS pos, UINT8 *buf, UINT size)
 		UINT rsize;
 
 		rsize = MIN(size, sxsi->size);
-		CPU_REMCLOCK -= rsize;
+		legacy_cpu_charge(rsize);
 
 		if (!(*p->f4)(p->pv, pos, rsize, buf))
 		{
@@ -276,7 +277,7 @@ static REG8 hdd_write(SXSIDEV sxsi, FILEPOS pos, const UINT8 *buf, UINT size)
 		UINT wsize;
 
 		wsize = MIN(size, sxsi->size);
-		CPU_REMCLOCK -= wsize;
+		legacy_cpu_charge(wsize);
 
 		if (!(*p->f5)(p->pv, pos, wsize, buf))
 		{
@@ -327,7 +328,7 @@ static REG8 hdd_format(SXSIDEV sxsi, FILEPOS pos)
 
 			wsize = MIN(size, sizeof(work));
 			size -= wsize;
-			CPU_REMCLOCK -= wsize;
+			legacy_cpu_charge(wsize);
 
 			if (!(*p->f5)(p->pv, pos, wsize, work))
 			{

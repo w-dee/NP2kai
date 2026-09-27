@@ -1,5 +1,6 @@
 #include	<compiler.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
 #include	<mem/memtram.h>
@@ -12,7 +13,7 @@
 
 REG8 MEMCALL memtram_rd8(UINT32 address) {
 
-	CPU_REMCLOCK -= MEMWAIT_TRAM;
+	legacy_cpu_charge(MEMWAIT_TRAM);
 	if (address < 0xa4000) {
 		return(mem[address]);
 	}
@@ -33,7 +34,7 @@ REG8 MEMCALL memtram_rd8(UINT32 address) {
 
 REG16 MEMCALL memtram_rd16(UINT32 address) {
 
-	CPU_REMCLOCK -= MEMWAIT_TRAM;
+	legacy_cpu_charge(MEMWAIT_TRAM);
 	if(hf_codeul) {
 		hook_fontrom(cgwindow.low);
 		hf_codeul = 0;
@@ -73,7 +74,7 @@ UINT32 MEMCALL memtram_rd32(UINT32 address){
 void MEMCALL memtram_wr8(UINT32 address, REG8 value) {
 	
 
-	CPU_REMCLOCK -= MEMWAIT_TRAM;
+	legacy_cpu_charge(MEMWAIT_TRAM);
 	if (address < 0xa2000) {
 		mem[address] = (UINT8)value;
 		tramupdate[LOW12(address >> 1)] |= 1;
@@ -129,7 +130,7 @@ void MEMCALL memtram_wr16(UINT32 address, REG16 value) {
 	}
 #endif
 
-	CPU_REMCLOCK -= MEMWAIT_TRAM;
+	legacy_cpu_charge(MEMWAIT_TRAM);
 	if (address < 0xa1fff) {
 		STOREINTELWORD(mem + address, value);
 		tramupdate[LOW12(address >> 1)] |= 1;

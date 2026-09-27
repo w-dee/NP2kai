@@ -1,5 +1,6 @@
 #include	<compiler.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
 
@@ -16,7 +17,7 @@ void artic_callback(void) {
 	else {
 		mul *= 16;
 	}
-	leng = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+	leng = legacy_cpu_device_now();
 	leng *= 2;
 	leng -= artic.lastclk2;
 	if (leng > 0) {
@@ -38,7 +39,7 @@ static UINT32 artic_getcnt(void) {
 	else {
 		mul *= 16;
 	}
-	leng = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+	leng = legacy_cpu_device_now();
 	leng *= 2;
 	leng -= artic.lastclk2;
 	if (leng > 0) {
@@ -55,7 +56,7 @@ static void IOOUTCALL artic_o5f(UINT port, REG8 dat) {
 
 	(void)port;
 	(void)dat;
-	CPU_REMCLOCK -= 20;
+	legacy_cpu_charge(20);
 }
 
 static REG8 IOINPCALL artic_i5c(UINT port) {

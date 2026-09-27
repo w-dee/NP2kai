@@ -5,6 +5,7 @@
 
 #include "compiler.h"
 #include "cpucore.h"
+#include <legacycpu.h>
 #include "pccore.h"
 #include <io/iocore.h>
 
@@ -214,7 +215,7 @@ static void IOOUTCALL boardws_opna_o18e(UINT port, REG8 dat)
 static REG8 IOINPCALL boardws_opna_i188(UINT port)
 {
 	(void)port;
-	CPU_REMCLOCK -= (SINT32)(pccore.realclock / 800000); // WORKAROUND: WaveStar�h���C�o��I/O�A�N�Z�X����������ƃG���[�ɂȂ�
+	legacy_cpu_charge((SINT32)(pccore.realclock / 800000)); // WORKAROUND: WaveStar�h���C�o��I/O�A�N�Z�X����������ƃG���[�ɂȂ�
 	return g_opna[0].s.status;
 }
 

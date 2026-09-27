@@ -1,3 +1,6 @@
+/* Host/frontend pacing domain: GETTICK-derived milliseconds and fractional
+ * frame counts. This interface does not commit CPU cycles or advance NEVENT.
+ * Keep NOWAIT/frame skip, presentation and audio demand policies unchanged. */
 
 #ifdef __cplusplus
 extern "C" {

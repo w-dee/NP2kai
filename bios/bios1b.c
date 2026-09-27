@@ -1,5 +1,6 @@
 #include <compiler.h>
 #include <cpucore.h>
+#include <legacycpu.h>
 #include <pccore.h>
 #include <io/iocore.h>
 #include <bios/bios.h>
@@ -1133,7 +1134,7 @@ UINT bios0x1b_wait(void) {
       int_timeout = 0;
       return (0);
     } else {
-      CPU_REMCLOCK -= 1000;
+      legacy_cpu_charge(1000);
 #if defined(CPUCORE_IA32)
       // np21w ver0.86 rev51 Win3.1用 暫定無限ループ回避
       if (CPU_STAT_PM && CPU_STAT_VM86) {

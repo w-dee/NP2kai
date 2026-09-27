@@ -1,5 +1,6 @@
 #include	<compiler.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
 #include	<font/font.h>
@@ -76,7 +77,7 @@ static void IOOUTCALL cgrom_oa1(UINT port, REG8 dat) {
 #if defined(SUPPORT_TEXTHOOK)
 	if(np2cfg.usetexthook){
 		// High -> Lowまでのクロック数計算
-		cgrom_readlow_clk = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+		cgrom_readlow_clk = legacy_cpu_device_now();
 		if (cgrom_lastreadhigh) {
 			cgrom_readhightolow_clkdiff = cgrom_readlow_clk - cgrom_readhigh_clk;
 			cgrom_lastreadhigh = 0;
@@ -89,7 +90,7 @@ static void IOOUTCALL cgrom_oa1(UINT port, REG8 dat) {
 		if (cgrom_readlowtohigh_clkdiff && cgrom_readhightolow_clkdiff && cgrom_readhightolow_clkdiff < cgrom_readlowtohigh_clkdiff) {
 			// よりクロック数が少ないHigh -> Lowの順に書き込んでいると思われる
 		// Low -> Highまでのクロック数計算
-		cgrom_readhigh_clk = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+		cgrom_readhigh_clk = legacy_cpu_device_now();
 		if (!cgrom_lastreadhigh) {
 			cgrom_readlowtohigh_clkdiff = cgrom_readhigh_clk - cgrom_readlow_clk;
 			cgrom_lastreadhigh = 1;

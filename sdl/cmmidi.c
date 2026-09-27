@@ -5,6 +5,7 @@
 #include <common/mimpidef.h>
 #include <sound/sound.h>
 #include <cpucore.h>
+#include <legacycpu.h>
 #include <pccore.h>
 
 #include <sys/types.h>
@@ -339,7 +340,7 @@ midi_write(CMMIDI midi, const UINT8 *cmd, UINT cnt)
 		do {
 #if defined(__LIBRETRO__)
 			if (retro_midi_interface && retro_midi_interface->output_enabled()) {
-				UINT64 current_time = CPU_CLOCK + CPU_BASECLOCK - CPU_REMCLOCK;
+				UINT64 current_time = legacy_cpu_device_now();
 				UINT64 delta_time;
 				if (Midi_write_time == 0)
 					Midi_write_time = current_time;

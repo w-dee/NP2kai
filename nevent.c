@@ -7,6 +7,7 @@
 #include <nevent.h>
 #include <cpucore.h>
 #include <pccore.h>
+#include <legacycpu.h>
 
 	_NEVENT g_nevent;
 #if 0
@@ -135,16 +136,14 @@ void nevent_get1stevent(void)
 	/* 最短のイベントのクロック数をセット */
 	if (g_nevent.readyevents)
 	{
-		CPU_BASECLOCK = g_nevent.item[g_nevent.level[0]].clock;
+		legacy_cpu_begin_slice(g_nevent.item[g_nevent.level[0]].clock);
 	}
 	else
 	{
 		/* イベントがない場合のクロック数をセット */
-		CPU_BASECLOCK = NEVENT_MAXCLOCK;
+		legacy_cpu_begin_slice(NEVENT_MAXCLOCK);
 	}
 
-	/* カウンタへセット */
-	CPU_REMCLOCK = CPU_BASECLOCK;
 	
 #if defined(SUPPORT_MULTITHREAD)
 	nevent_leave_criticalsection();
@@ -192,7 +191,7 @@ static void nevent_execute(void)
 void nevent_progress(void)
 {
 	UINT nEvents;
-	SINT32 nextbase;
+	LEGACY_DEADLINE nextbase;
 	UINT i;
 	NEVENTID id;
 	NEVENTITEM item;
@@ -201,14 +200,14 @@ void nevent_progress(void)
 #if defined(SUPPORT_MULTITHREAD)
 	nevent_enter_criticalsection();
 #endif
-	CPU_CLOCK += CPU_BASECLOCK;
+	legacy_cpu_commit_slice();
 	nEvents = 0;
 	nextbase = NEVENT_MAXCLOCK;
 	for (i = 0; i < g_nevent.readyevents; i++)
 	{
 		id = g_nevent.level[i];
 		item = &g_nevent.item[id];
-		item->clock -= CPU_BASECLOCK;
+		item->clock -= legacy_cpu_slice_budget();
 		if (item->clock > 0)
 		{
 			/* イベント待ち中 */
@@ -235,8 +234,7 @@ void nevent_progress(void)
 		fevtchk |= (id==NEVENT_FLAMES ? 1 : 0);
 	}
 	g_nevent.readyevents = nEvents;
-	CPU_BASECLOCK = nextbase;
-	CPU_REMCLOCK += nextbase;
+	legacy_cpu_continue_slice(nextbase);
 	nevent_execute();
 
 	// NEVENT_FLAMESが消える問題に暫定対処
@@ -282,11 +280,11 @@ void nevent_changeclock(UINT32 oldclock, UINT32 newclock)
 
 			// 自動調整のクロック変更のタイミングは CPU_BASECLOCK==CPU_REMCLOCK のタイミングになるように調整済み
 			if (CPU_BASECLOCK == CPU_REMCLOCK) {
-				CPU_BASECLOCK = g_nevent.item[g_nevent.level[0]].clock;
-				CPU_REMCLOCK = CPU_BASECLOCK;/* カウンタへセット */
+				legacy_cpu_begin_slice(g_nevent.item[g_nevent.level[0]].clock);
 			}
 			else {
 				// I/O経由の場合はずれている場合あり。この場合はスケール
+				/* Scheduler-owned rate conversion, not invariant-preserving rebase. */
 				CPU_BASECLOCK = ((SINT64)CPU_BASECLOCK * newclock + oldclock / 2) / oldclock;
 				CPU_REMCLOCK = ((SINT64)CPU_REMCLOCK * newclock + oldclock / 2) / oldclock;
 			}
@@ -360,7 +358,7 @@ void nevent_waitreset(NEVENTID id)
 
 void nevent_set(NEVENTID id, SINT32 eventclock, NEVENTCB proc, NEVENTPOSITION absolute)
 {
-	SINT32 clk;
+	LEGACY_DEADLINE clk;
 	NEVENTITEM item;
 	UINT eventId;
 	UINT i;
@@ -370,7 +368,7 @@ void nevent_set(NEVENTID id, SINT32 eventclock, NEVENTCB proc, NEVENTPOSITION ab
 #endif
 //	TRACEOUT(("event %d - %xclocks", id, eventclock));
 
-	clk = CPU_BASECLOCK - CPU_REMCLOCK;
+	clk = legacy_cpu_slice_elapsed();
 	item = &g_nevent.item[id];
 	item->proc = proc;
 	item->flag = 0;
@@ -411,9 +409,8 @@ void nevent_set(NEVENTID id, SINT32 eventclock, NEVENTCB proc, NEVENTPOSITION ab
 	/* もし最短イベントだったら... */
 	if (eventId == 0)
 	{
-		clk = CPU_BASECLOCK - item->clock;
-		CPU_BASECLOCK -= clk;
-		CPU_REMCLOCK -= clk;
+		clk = legacy_cpu_slice_budget() - item->clock;
+		legacy_cpu_rebase_slice(clk);
 //		TRACEOUT(("reset nextbase -%d (%d)", clock, CPU_REMCLOCK));
 	}
 #if defined(SUPPORT_MULTITHREAD)
@@ -423,15 +420,7 @@ void nevent_set(NEVENTID id, SINT32 eventclock, NEVENTCB proc, NEVENTPOSITION ab
 
 void nevent_setbyms(NEVENTID id, SINT32 ms, NEVENTCB proc, NEVENTPOSITION absolute)
 {
-	UINT64 waittime = (UINT64)(pccore.realclock / 1000) * ms;
-	if (waittime > INT_MAX - pccore.realclock)
-	{
-		nevent_set(id, INT_MAX - pccore.realclock, proc, absolute);
-	}
-	else
-	{
-		nevent_set(id, (SINT32)waittime, proc, absolute);
-	}
+	nevent_set(id, legacy_deadline_from_ms(pccore.realclock, ms), proc, absolute);
 }
 
 BOOL nevent_iswork(NEVENTID id)
@@ -489,7 +478,7 @@ SINT32 nevent_getremain(NEVENTID id)
 	{
 		if (g_nevent.level[i] == id)
 		{
-			SINT32 result = (g_nevent.item[id].clock - (CPU_BASECLOCK - CPU_REMCLOCK));
+			SINT32 result = (g_nevent.item[id].clock - (legacy_cpu_slice_elapsed()));
 #if defined(SUPPORT_MULTITHREAD)
 			nevent_leave_criticalsection();
 #endif
@@ -507,11 +496,7 @@ void nevent_forceexit(void)
 #if defined(SUPPORT_MULTITHREAD)
 	nevent_enter_criticalsection();
 #endif
-	if (CPU_REMCLOCK > 0)
-	{
-		CPU_BASECLOCK -= CPU_REMCLOCK;
-		CPU_REMCLOCK = 0;
-	}
+	legacy_cpu_forceexit();
 #if defined(SUPPORT_MULTITHREAD)
 	nevent_leave_criticalsection();
 #endif

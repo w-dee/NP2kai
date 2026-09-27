@@ -4,6 +4,7 @@
 
 #include	<compiler.h>
 #include	<cpucore.h>
+#include <legacycpu.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
 #include	<sound/sound.h>
@@ -404,12 +405,12 @@ static void IOOUTCALL pit_o73(UINT port, REG8 dat) {
 				beep_data[g_beep.beep_data_load_loc] += dat << 8;
 			break;
 		}
-		beep_time[g_beep.beep_data_load_loc] = CPU_CLOCK;
+		beep_time[g_beep.beep_data_load_loc] = legacy_cpu_committed_cycles();
 		if(!(beep_mode_bit == 2 && beep_mode_bit_c == 0)) {
 			g_beep.beep_data_load_loc++;
 			if(g_beep.beep_data_load_loc >= BEEPDATACOUNT)
 				g_beep.beep_data_load_loc = 0;
-			g_beep.beep_laskclk = CPU_CLOCK;
+			g_beep.beep_laskclk = legacy_cpu_committed_cycles();
 		}
 		beep_mode_bit_c ^= 1;
 	}
@@ -455,7 +456,7 @@ static void IOOUTCALL pit_o77(UINT port, REG8 dat) {
 	PITCH	pitch;
 
 	if((dat & 0xC0) == 0x40) {
-		if(CPU_CLOCK - g_beep.beep_laskclk >= 20000000) {
+		if(legacy_cpu_committed_cycles() - g_beep.beep_laskclk >= 20000000) {
 			g_beep.beep_data_load_loc = 0;
 			g_beep.beep_data_curr_loc = 0;
 		}
