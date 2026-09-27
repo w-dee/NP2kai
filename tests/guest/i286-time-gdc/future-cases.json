@@ -1,0 +1,2068 @@
+{
+  "schema": 1,
+  "product_qualification_executed": false,
+  "authority": "LEGACY_COMPATIBILITY_PROFILE; no physical waveform claim",
+  "parent": "134af751728c0a2f85abcf29e45a93ebfb94b21b",
+  "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC",
+  "matrix": {
+    "backends": [
+      "i286",
+      "ia32"
+    ],
+    "runtime_multipliers": [
+      1,
+      4,
+      20
+    ],
+    "runtime_bases": [
+      1996800,
+      2457600
+    ],
+    "fixed_display_bases": [
+      1996800,
+      2457600
+    ],
+    "scan_classes": [
+      15,
+      24,
+      31
+    ],
+    "RASTER": [
+      0
+    ],
+    "PIT": [
+      "OFF initially",
+      "ON composition follow-up"
+    ],
+    "backend_class_admission": {
+      "i286": [
+        15,
+        24
+      ],
+      "ia32": [
+        15,
+        24,
+        31
+      ]
+    },
+    "admission_note": "Stock i286 omits SUPPORT_CRT31KHZ; crossed runs apply to supported classes only. This fixture mission does not enable that product feature."
+  },
+  "binding": {
+    "proposed_symbols": [
+      "gdc_fake_sample",
+      "gdc_machine_service"
+    ],
+    "qualified_adapter": false,
+    "requirements": [
+      "stable cold-boot B_ref separate from runtime CPU base",
+      "freeze provider across each pair of guest status reads",
+      "only private time source may be controlled; never write result/GDC/PIC/CPU state",
+      "service while guest CPU is held must preserve complete CPU ledger",
+      "verify actual HLT before advancing wake time; port64 checkpoint alone is insufficient",
+      "honor pending SYNC work, old latched deadline and approved commit frontier",
+      "nanosecond anchor offsets use ceil(Q*1e9/(5*B_ref)); preserve sub-grid remainder",
+      "first valid anchor and diagnostic policy must be qualified separately",
+      "symbol presence alone does not authorize execution or PASS"
+    ]
+  },
+  "phase_formula": {
+    "F": "D+V",
+    "p": "Q%F",
+    "vsync": "p>=D",
+    "remaining": "F-p if p>=D else D-p",
+    "bit6": "remaining%R < H",
+    "semantics": "right-continuous after service; no extra TURE_SYNC"
+  },
+  "profiles": [
+    {
+      "scan_class": 15,
+      "B_ref": 1996800,
+      "M_ref": 5,
+      "master_sync": [
+        16,
+        78,
+        7,
+        37,
+        13,
+        15,
+        200,
+        148
+      ],
+      "slave_sync": [
+        6,
+        38,
+        3,
+        17,
+        134,
+        15,
+        200,
+        148
+      ],
+      "clocks": {
+        "hclock": 15980,
+        "vclock": 614,
+        "rasterclock": 624,
+        "hsyncclock": 445,
+        "dispclock": 124800,
+        "vsyncclock": 37640
+      },
+      "selected_points": [
+        {
+          "case": 1,
+          "reference_tick": 0,
+          "first_ns_on_tick": 0,
+          "expected": {
+            "frames": 0,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 124800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 2,
+          "reference_tick": 1,
+          "first_ns_on_tick": 101,
+          "expected": {
+            "frames": 0,
+            "phase": 1,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 124799,
+            "modulo": 623
+          }
+        },
+        {
+          "case": 3,
+          "reference_tick": 179,
+          "first_ns_on_tick": 17929,
+          "expected": {
+            "frames": 0,
+            "phase": 179,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 124621,
+            "modulo": 445
+          }
+        },
+        {
+          "case": 4,
+          "reference_tick": 180,
+          "first_ns_on_tick": 18029,
+          "expected": {
+            "frames": 0,
+            "phase": 180,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 124620,
+            "modulo": 444
+          }
+        },
+        {
+          "case": 5,
+          "reference_tick": 625,
+          "first_ns_on_tick": 62601,
+          "expected": {
+            "frames": 0,
+            "phase": 625,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 124175,
+            "modulo": 623
+          }
+        },
+        {
+          "case": 6,
+          "reference_tick": 1247,
+          "first_ns_on_tick": 124900,
+          "expected": {
+            "frames": 0,
+            "phase": 1247,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 123553,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 7,
+          "reference_tick": 1249,
+          "first_ns_on_tick": 125101,
+          "expected": {
+            "frames": 0,
+            "phase": 1249,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 123551,
+            "modulo": 623
+          }
+        },
+        {
+          "case": 8,
+          "reference_tick": 124799,
+          "first_ns_on_tick": 12499900,
+          "expected": {
+            "frames": 0,
+            "phase": 124799,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 1,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 9,
+          "reference_tick": 124800,
+          "first_ns_on_tick": 12500000,
+          "expected": {
+            "frames": 0,
+            "phase": 124800,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 37640,
+            "modulo": 200
+          }
+        },
+        {
+          "case": 10,
+          "reference_tick": 124801,
+          "first_ns_on_tick": 12500101,
+          "expected": {
+            "frames": 0,
+            "phase": 124801,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 37639,
+            "modulo": 199
+          }
+        },
+        {
+          "case": 11,
+          "reference_tick": 162440,
+          "first_ns_on_tick": 16270033,
+          "expected": {
+            "frames": 1,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 124800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 12,
+          "reference_tick": 324880,
+          "first_ns_on_tick": 32540065,
+          "expected": {
+            "frames": 2,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 124800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 13,
+          "reference_tick": 812200,
+          "first_ns_on_tick": 81350161,
+          "expected": {
+            "frames": 5,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 124800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 14,
+          "reference_tick": 162440000000812200,
+          "first_ns_on_tick": 16270032051363401443,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 124800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 15,
+          "reference_tick": 162440000000812200,
+          "first_ns_on_tick": 16270032051363401443,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 124800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 16,
+          "reference_tick": 162440000000812200,
+          "first_ns_on_tick": 16270032051363401443,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 124800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 17,
+          "reference_tick": 162440000000937000,
+          "first_ns_on_tick": 16270032051375901443,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 124800,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 37640,
+            "modulo": 200
+          }
+        }
+      ]
+    },
+    {
+      "scan_class": 15,
+      "B_ref": 2457600,
+      "M_ref": 5,
+      "master_sync": [
+        16,
+        78,
+        7,
+        37,
+        13,
+        15,
+        200,
+        148
+      ],
+      "slave_sync": [
+        6,
+        38,
+        3,
+        17,
+        134,
+        15,
+        200,
+        148
+      ],
+      "clocks": {
+        "hclock": 15980,
+        "vclock": 614,
+        "rasterclock": 768,
+        "hsyncclock": 548,
+        "dispclock": 153600,
+        "vsyncclock": 46325
+      },
+      "selected_points": [
+        {
+          "case": 1,
+          "reference_tick": 0,
+          "first_ns_on_tick": 0,
+          "expected": {
+            "frames": 0,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 153600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 2,
+          "reference_tick": 1,
+          "first_ns_on_tick": 82,
+          "expected": {
+            "frames": 0,
+            "phase": 1,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 153599,
+            "modulo": 767
+          }
+        },
+        {
+          "case": 3,
+          "reference_tick": 220,
+          "first_ns_on_tick": 17904,
+          "expected": {
+            "frames": 0,
+            "phase": 220,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 153380,
+            "modulo": 548
+          }
+        },
+        {
+          "case": 4,
+          "reference_tick": 221,
+          "first_ns_on_tick": 17986,
+          "expected": {
+            "frames": 0,
+            "phase": 221,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 153379,
+            "modulo": 547
+          }
+        },
+        {
+          "case": 5,
+          "reference_tick": 769,
+          "first_ns_on_tick": 62582,
+          "expected": {
+            "frames": 0,
+            "phase": 769,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 152831,
+            "modulo": 767
+          }
+        },
+        {
+          "case": 6,
+          "reference_tick": 1535,
+          "first_ns_on_tick": 124919,
+          "expected": {
+            "frames": 0,
+            "phase": 1535,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 152065,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 7,
+          "reference_tick": 1537,
+          "first_ns_on_tick": 125082,
+          "expected": {
+            "frames": 0,
+            "phase": 1537,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 152063,
+            "modulo": 767
+          }
+        },
+        {
+          "case": 8,
+          "reference_tick": 153599,
+          "first_ns_on_tick": 12499919,
+          "expected": {
+            "frames": 0,
+            "phase": 153599,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 1,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 9,
+          "reference_tick": 153600,
+          "first_ns_on_tick": 12500000,
+          "expected": {
+            "frames": 0,
+            "phase": 153600,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 46325,
+            "modulo": 245
+          }
+        },
+        {
+          "case": 10,
+          "reference_tick": 153601,
+          "first_ns_on_tick": 12500082,
+          "expected": {
+            "frames": 0,
+            "phase": 153601,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 46324,
+            "modulo": 244
+          }
+        },
+        {
+          "case": 11,
+          "reference_tick": 199925,
+          "first_ns_on_tick": 16269939,
+          "expected": {
+            "frames": 1,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 153600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 12,
+          "reference_tick": 399850,
+          "first_ns_on_tick": 32539877,
+          "expected": {
+            "frames": 2,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 153600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 13,
+          "reference_tick": 999625,
+          "first_ns_on_tick": 81349691,
+          "expected": {
+            "frames": 5,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 153600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 14,
+          "reference_tick": 199925000000999625,
+          "first_ns_on_tick": 16269938151123016358,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 153600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 15,
+          "reference_tick": 199925000000999625,
+          "first_ns_on_tick": 16269938151123016358,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 153600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 16,
+          "reference_tick": 199925000000999625,
+          "first_ns_on_tick": 16269938151123016358,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 153600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 17,
+          "reference_tick": 199925000001153225,
+          "first_ns_on_tick": 16269938151135516358,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 153600,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 46325,
+            "modulo": 245
+          }
+        }
+      ]
+    },
+    {
+      "scan_class": 24,
+      "B_ref": 1996800,
+      "M_ref": 5,
+      "master_sync": [
+        16,
+        78,
+        7,
+        37,
+        7,
+        7,
+        144,
+        101
+      ],
+      "slave_sync": [
+        6,
+        38,
+        3,
+        17,
+        131,
+        7,
+        144,
+        101
+      ],
+      "clocks": {
+        "hclock": 24826,
+        "vclock": 564,
+        "rasterclock": 402,
+        "hsyncclock": 303,
+        "dispclock": 160800,
+        "vsyncclock": 16145
+      },
+      "selected_points": [
+        {
+          "case": 1,
+          "reference_tick": 0,
+          "first_ns_on_tick": 0,
+          "expected": {
+            "frames": 0,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 160800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 2,
+          "reference_tick": 1,
+          "first_ns_on_tick": 101,
+          "expected": {
+            "frames": 0,
+            "phase": 1,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 160799,
+            "modulo": 401
+          }
+        },
+        {
+          "case": 3,
+          "reference_tick": 99,
+          "first_ns_on_tick": 9916,
+          "expected": {
+            "frames": 0,
+            "phase": 99,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 160701,
+            "modulo": 303
+          }
+        },
+        {
+          "case": 4,
+          "reference_tick": 100,
+          "first_ns_on_tick": 10017,
+          "expected": {
+            "frames": 0,
+            "phase": 100,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 160700,
+            "modulo": 302
+          }
+        },
+        {
+          "case": 5,
+          "reference_tick": 403,
+          "first_ns_on_tick": 40365,
+          "expected": {
+            "frames": 0,
+            "phase": 403,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 160397,
+            "modulo": 401
+          }
+        },
+        {
+          "case": 6,
+          "reference_tick": 803,
+          "first_ns_on_tick": 80429,
+          "expected": {
+            "frames": 0,
+            "phase": 803,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 159997,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 7,
+          "reference_tick": 805,
+          "first_ns_on_tick": 80630,
+          "expected": {
+            "frames": 0,
+            "phase": 805,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 159995,
+            "modulo": 401
+          }
+        },
+        {
+          "case": 8,
+          "reference_tick": 160799,
+          "first_ns_on_tick": 16105670,
+          "expected": {
+            "frames": 0,
+            "phase": 160799,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 1,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 9,
+          "reference_tick": 160800,
+          "first_ns_on_tick": 16105770,
+          "expected": {
+            "frames": 0,
+            "phase": 160800,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 16145,
+            "modulo": 65
+          }
+        },
+        {
+          "case": 10,
+          "reference_tick": 160801,
+          "first_ns_on_tick": 16105870,
+          "expected": {
+            "frames": 0,
+            "phase": 160801,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 16144,
+            "modulo": 64
+          }
+        },
+        {
+          "case": 11,
+          "reference_tick": 176945,
+          "first_ns_on_tick": 17722857,
+          "expected": {
+            "frames": 1,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 160800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 12,
+          "reference_tick": 353890,
+          "first_ns_on_tick": 35445714,
+          "expected": {
+            "frames": 2,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 160800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 13,
+          "reference_tick": 884725,
+          "first_ns_on_tick": 88614283,
+          "expected": {
+            "frames": 5,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 160800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 14,
+          "reference_tick": 176945000000884725,
+          "first_ns_on_tick": 17722856570601434796,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 160800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 15,
+          "reference_tick": 176945000000884725,
+          "first_ns_on_tick": 17722856570601434796,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 160800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 16,
+          "reference_tick": 176945000000884725,
+          "first_ns_on_tick": 17722856570601434796,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 160800,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 17,
+          "reference_tick": 176945000001045525,
+          "first_ns_on_tick": 17722856570617540565,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 160800,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 16145,
+            "modulo": 65
+          }
+        }
+      ]
+    },
+    {
+      "scan_class": 24,
+      "B_ref": 2457600,
+      "M_ref": 5,
+      "master_sync": [
+        16,
+        78,
+        7,
+        37,
+        7,
+        7,
+        144,
+        101
+      ],
+      "slave_sync": [
+        6,
+        38,
+        3,
+        17,
+        131,
+        7,
+        144,
+        101
+      ],
+      "clocks": {
+        "hclock": 24826,
+        "vclock": 564,
+        "rasterclock": 494,
+        "hsyncclock": 372,
+        "dispclock": 197600,
+        "vsyncclock": 20180
+      },
+      "selected_points": [
+        {
+          "case": 1,
+          "reference_tick": 0,
+          "first_ns_on_tick": 0,
+          "expected": {
+            "frames": 0,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 197600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 2,
+          "reference_tick": 1,
+          "first_ns_on_tick": 82,
+          "expected": {
+            "frames": 0,
+            "phase": 1,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 197599,
+            "modulo": 493
+          }
+        },
+        {
+          "case": 3,
+          "reference_tick": 122,
+          "first_ns_on_tick": 9929,
+          "expected": {
+            "frames": 0,
+            "phase": 122,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 197478,
+            "modulo": 372
+          }
+        },
+        {
+          "case": 4,
+          "reference_tick": 123,
+          "first_ns_on_tick": 10010,
+          "expected": {
+            "frames": 0,
+            "phase": 123,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 197477,
+            "modulo": 371
+          }
+        },
+        {
+          "case": 5,
+          "reference_tick": 495,
+          "first_ns_on_tick": 40284,
+          "expected": {
+            "frames": 0,
+            "phase": 495,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 197105,
+            "modulo": 493
+          }
+        },
+        {
+          "case": 6,
+          "reference_tick": 987,
+          "first_ns_on_tick": 80323,
+          "expected": {
+            "frames": 0,
+            "phase": 987,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 196613,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 7,
+          "reference_tick": 989,
+          "first_ns_on_tick": 80486,
+          "expected": {
+            "frames": 0,
+            "phase": 989,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 196611,
+            "modulo": 493
+          }
+        },
+        {
+          "case": 8,
+          "reference_tick": 197599,
+          "first_ns_on_tick": 16080648,
+          "expected": {
+            "frames": 0,
+            "phase": 197599,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 1,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 9,
+          "reference_tick": 197600,
+          "first_ns_on_tick": 16080730,
+          "expected": {
+            "frames": 0,
+            "phase": 197600,
+            "vsync": 1,
+            "hblank": 0,
+            "remaining": 20180,
+            "modulo": 420
+          }
+        },
+        {
+          "case": 10,
+          "reference_tick": 197601,
+          "first_ns_on_tick": 16080811,
+          "expected": {
+            "frames": 0,
+            "phase": 197601,
+            "vsync": 1,
+            "hblank": 0,
+            "remaining": 20179,
+            "modulo": 419
+          }
+        },
+        {
+          "case": 11,
+          "reference_tick": 217780,
+          "first_ns_on_tick": 17722982,
+          "expected": {
+            "frames": 1,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 197600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 12,
+          "reference_tick": 435560,
+          "first_ns_on_tick": 35445964,
+          "expected": {
+            "frames": 2,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 197600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 13,
+          "reference_tick": 1088900,
+          "first_ns_on_tick": 88614909,
+          "expected": {
+            "frames": 5,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 197600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 14,
+          "reference_tick": 217780000001088900,
+          "first_ns_on_tick": 17722981770921948243,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 197600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 15,
+          "reference_tick": 217780000001088900,
+          "first_ns_on_tick": 17722981770921948243,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 197600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 16,
+          "reference_tick": 217780000001088900,
+          "first_ns_on_tick": 17722981770921948243,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 197600,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 17,
+          "reference_tick": 217780000001286500,
+          "first_ns_on_tick": 17722981770938028972,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 197600,
+            "vsync": 1,
+            "hblank": 0,
+            "remaining": 20180,
+            "modulo": 420
+          }
+        }
+      ]
+    },
+    {
+      "scan_class": 31,
+      "B_ref": 1996800,
+      "M_ref": 5,
+      "master_sync": [
+        16,
+        78,
+        75,
+        12,
+        3,
+        11,
+        219,
+        149
+      ],
+      "slave_sync": [
+        2,
+        78,
+        75,
+        12,
+        131,
+        6,
+        224,
+        149
+      ],
+      "clocks": {
+        "hclock": 31575,
+        "vclock": 601,
+        "rasterclock": 316,
+        "hsyncclock": 252,
+        "dispclock": 150100,
+        "vsyncclock": 15900
+      },
+      "selected_points": [
+        {
+          "case": 1,
+          "reference_tick": 0,
+          "first_ns_on_tick": 0,
+          "expected": {
+            "frames": 0,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 150100,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 2,
+          "reference_tick": 1,
+          "first_ns_on_tick": 101,
+          "expected": {
+            "frames": 0,
+            "phase": 1,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 150099,
+            "modulo": 315
+          }
+        },
+        {
+          "case": 3,
+          "reference_tick": 64,
+          "first_ns_on_tick": 6411,
+          "expected": {
+            "frames": 0,
+            "phase": 64,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 150036,
+            "modulo": 252
+          }
+        },
+        {
+          "case": 4,
+          "reference_tick": 65,
+          "first_ns_on_tick": 6511,
+          "expected": {
+            "frames": 0,
+            "phase": 65,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 150035,
+            "modulo": 251
+          }
+        },
+        {
+          "case": 5,
+          "reference_tick": 317,
+          "first_ns_on_tick": 31751,
+          "expected": {
+            "frames": 0,
+            "phase": 317,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 149783,
+            "modulo": 315
+          }
+        },
+        {
+          "case": 6,
+          "reference_tick": 631,
+          "first_ns_on_tick": 63202,
+          "expected": {
+            "frames": 0,
+            "phase": 631,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 149469,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 7,
+          "reference_tick": 633,
+          "first_ns_on_tick": 63402,
+          "expected": {
+            "frames": 0,
+            "phase": 633,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 149467,
+            "modulo": 315
+          }
+        },
+        {
+          "case": 8,
+          "reference_tick": 150099,
+          "first_ns_on_tick": 15033955,
+          "expected": {
+            "frames": 0,
+            "phase": 150099,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 1,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 9,
+          "reference_tick": 150100,
+          "first_ns_on_tick": 15034055,
+          "expected": {
+            "frames": 0,
+            "phase": 150100,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 15900,
+            "modulo": 100
+          }
+        },
+        {
+          "case": 10,
+          "reference_tick": 150101,
+          "first_ns_on_tick": 15034155,
+          "expected": {
+            "frames": 0,
+            "phase": 150101,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 15899,
+            "modulo": 99
+          }
+        },
+        {
+          "case": 11,
+          "reference_tick": 166000,
+          "first_ns_on_tick": 16626603,
+          "expected": {
+            "frames": 1,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 150100,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 12,
+          "reference_tick": 332000,
+          "first_ns_on_tick": 33253206,
+          "expected": {
+            "frames": 2,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 150100,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 13,
+          "reference_tick": 830000,
+          "first_ns_on_tick": 83133013,
+          "expected": {
+            "frames": 5,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 150100,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 14,
+          "reference_tick": 166000000000830000,
+          "first_ns_on_tick": 16626602564185697116,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 150100,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 15,
+          "reference_tick": 166000000000830000,
+          "first_ns_on_tick": 16626602564185697116,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 150100,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 16,
+          "reference_tick": 166000000000830000,
+          "first_ns_on_tick": 16626602564185697116,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 150100,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 17,
+          "reference_tick": 166000000000980100,
+          "first_ns_on_tick": 16626602564200731170,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 150100,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 15900,
+            "modulo": 100
+          }
+        }
+      ]
+    },
+    {
+      "scan_class": 31,
+      "B_ref": 2457600,
+      "M_ref": 5,
+      "master_sync": [
+        16,
+        78,
+        75,
+        12,
+        3,
+        11,
+        219,
+        149
+      ],
+      "slave_sync": [
+        2,
+        78,
+        75,
+        12,
+        131,
+        6,
+        224,
+        149
+      ],
+      "clocks": {
+        "hclock": 31575,
+        "vclock": 601,
+        "rasterclock": 389,
+        "hsyncclock": 311,
+        "dispclock": 184775,
+        "vsyncclock": 19535
+      },
+      "selected_points": [
+        {
+          "case": 1,
+          "reference_tick": 0,
+          "first_ns_on_tick": 0,
+          "expected": {
+            "frames": 0,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 184775,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 2,
+          "reference_tick": 1,
+          "first_ns_on_tick": 82,
+          "expected": {
+            "frames": 0,
+            "phase": 1,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 184774,
+            "modulo": 388
+          }
+        },
+        {
+          "case": 3,
+          "reference_tick": 78,
+          "first_ns_on_tick": 6348,
+          "expected": {
+            "frames": 0,
+            "phase": 78,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 184697,
+            "modulo": 311
+          }
+        },
+        {
+          "case": 4,
+          "reference_tick": 79,
+          "first_ns_on_tick": 6430,
+          "expected": {
+            "frames": 0,
+            "phase": 79,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 184696,
+            "modulo": 310
+          }
+        },
+        {
+          "case": 5,
+          "reference_tick": 390,
+          "first_ns_on_tick": 31739,
+          "expected": {
+            "frames": 0,
+            "phase": 390,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 184385,
+            "modulo": 388
+          }
+        },
+        {
+          "case": 6,
+          "reference_tick": 777,
+          "first_ns_on_tick": 63233,
+          "expected": {
+            "frames": 0,
+            "phase": 777,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 183998,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 7,
+          "reference_tick": 779,
+          "first_ns_on_tick": 63396,
+          "expected": {
+            "frames": 0,
+            "phase": 779,
+            "vsync": 0,
+            "hblank": 0,
+            "remaining": 183996,
+            "modulo": 388
+          }
+        },
+        {
+          "case": 8,
+          "reference_tick": 184774,
+          "first_ns_on_tick": 15036947,
+          "expected": {
+            "frames": 0,
+            "phase": 184774,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 1,
+            "modulo": 1
+          }
+        },
+        {
+          "case": 9,
+          "reference_tick": 184775,
+          "first_ns_on_tick": 15037028,
+          "expected": {
+            "frames": 0,
+            "phase": 184775,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 19535,
+            "modulo": 85
+          }
+        },
+        {
+          "case": 10,
+          "reference_tick": 184776,
+          "first_ns_on_tick": 15037110,
+          "expected": {
+            "frames": 0,
+            "phase": 184776,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 19534,
+            "modulo": 84
+          }
+        },
+        {
+          "case": 11,
+          "reference_tick": 204310,
+          "first_ns_on_tick": 16626791,
+          "expected": {
+            "frames": 1,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 184775,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 12,
+          "reference_tick": 408620,
+          "first_ns_on_tick": 33253581,
+          "expected": {
+            "frames": 2,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 184775,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 13,
+          "reference_tick": 1021550,
+          "first_ns_on_tick": 83133952,
+          "expected": {
+            "frames": 5,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 184775,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 14,
+          "reference_tick": 204310000001021550,
+          "first_ns_on_tick": 16626790364666467286,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 184775,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 15,
+          "reference_tick": 204310000001021550,
+          "first_ns_on_tick": 16626790364666467286,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 184775,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 16,
+          "reference_tick": 204310000001021550,
+          "first_ns_on_tick": 16626790364666467286,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 0,
+            "vsync": 0,
+            "hblank": 1,
+            "remaining": 184775,
+            "modulo": 0
+          }
+        },
+        {
+          "case": 17,
+          "reference_tick": 204310000001206325,
+          "first_ns_on_tick": 16626790364681504314,
+          "expected": {
+            "frames": 1000000000005,
+            "phase": 184775,
+            "vsync": 1,
+            "hblank": 1,
+            "remaining": 19535,
+            "modulo": 85
+          }
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "case": 1,
+      "name": "PROGRAMMED",
+      "checkpoint": "0x2001",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "anchor stable display epoch after two settling frames; freeze",
+      "expected": "committed SYNC; bit5=0",
+      "preflight": [
+        "A01",
+        "E01"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 2,
+      "name": "H_OUTSIDE",
+      "checkpoint": "0x2002",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=1",
+      "expected": "bit6=0",
+      "preflight": [
+        "A02",
+        "A03"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 3,
+      "name": "H_BEFORE_ENTRY",
+      "checkpoint": "0x2003",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=R-H",
+      "expected": "bit6=0 at threshold equality",
+      "preflight": [
+        "A03"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 4,
+      "name": "H_INSIDE",
+      "checkpoint": "0x2004",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=R-H+1",
+      "expected": "bit6=1 at first inside quantum",
+      "preflight": [
+        "A03"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 5,
+      "name": "H_AFTER_EXIT",
+      "checkpoint": "0x2005",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=R+1",
+      "expected": "bit6=0 after modulo wraps",
+      "preflight": [
+        "A03"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 6,
+      "name": "LINE_BEFORE",
+      "checkpoint": "0x2006",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=2R-1",
+      "expected": "bit6=1 before line boundary",
+      "preflight": [
+        "A04"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 7,
+      "name": "LINE_AFTER",
+      "checkpoint": "0x2007",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=2R+1",
+      "expected": "bit6=0 after line boundary",
+      "preflight": [
+        "A04"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 8,
+      "name": "V_BEFORE",
+      "checkpoint": "0x2008",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=D-1",
+      "expected": "bit5=0; countdown uses display end",
+      "preflight": [
+        "A05"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 9,
+      "name": "V_ENTRY",
+      "checkpoint": "0x2009",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=D; service all deadlines <= frontier",
+      "expected": "bit5=1; recompute bit6 from latched V endpoint",
+      "preflight": [
+        "A05",
+        "C01"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 10,
+      "name": "V_INSIDE",
+      "checkpoint": "0x200a",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=D+1",
+      "expected": "bit5=1; no TURE_SYNC double-toggle",
+      "preflight": [
+        "A05",
+        "C04"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 11,
+      "name": "V_EXIT",
+      "checkpoint": "0x200b",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=F; service display transition",
+      "expected": "bit5=0; pending unaccepted IRQ2 expires",
+      "preflight": [
+        "A06"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 12,
+      "name": "ONE_FRAME",
+      "checkpoint": "0x200c",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=2F",
+      "expected": "same phase as one full frame earlier",
+      "preflight": [
+        "A07"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 13,
+      "name": "SEVERAL_FRAMES",
+      "checkpoint": "0x200d",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=5F",
+      "expected": "three further frames; finite PIC state, no backlog",
+      "preflight": [
+        "A07"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 14,
+      "name": "HUGE_GAP",
+      "checkpoint": "0x200e",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "Q=(10^12+5)*F",
+      "expected": "bounded finite transforms; no per-frame loop; host service-cost/model check",
+      "preflight": [
+        "A07",
+        "A08"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 15,
+      "name": "CPU_WORK_BEFORE",
+      "checkpoint": "0x200f",
+      "assertion": "ARCHITECTURAL_ASSERTION",
+      "action": "same Q as14, freeze through substantial guest CPU work",
+      "expected": "host CPU ledger before; reference phase fixed",
+      "preflight": [
+        "B01"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 16,
+      "name": "CPU_WORK_AFTER",
+      "checkpoint": "0x2010",
+      "assertion": "ARCHITECTURAL_ASSERTION",
+      "action": "same Q as15",
+      "expected": "guest progress delta32768; positive CPU ledger delta; exact phase/IRR unchanged",
+      "preflight": [
+        "B01"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 17,
+      "name": "CPU_HELD",
+      "checkpoint": "0x2011",
+      "assertion": "ARCHITECTURAL_ASSERTION",
+      "action": "at 0x3010 hold CPU; advance D ticks through qualified service seam",
+      "expected": "byte-identical CPU ledger during service; bit5=1 and phase changes; then resume to sample",
+      "preflight": [
+        "B02"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 18,
+      "name": "IRQ_MASKED_PENDING",
+      "checkpoint": "0x2012",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "after guest maskFF/port64 (0x3002), service next VSync at 0x1204",
+      "expected": "IMR2=1 IRR2=1 ISR2=0 accepted_count=0; A=0",
+      "preflight": [
+        "D01",
+        "D02"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 19,
+      "name": "IRQ_MASKED_EXPIRED",
+      "checkpoint": "0x2013",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "at 0x1200 service following display start",
+      "expected": "IRR2=0 accepted_count=0 A=1; no queued periods",
+      "preflight": [
+        "D02",
+        "D03"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 20,
+      "name": "IRQ_ACCEPTED_ISR",
+      "checkpoint": "0x2014",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "at 0x3003 after guest unmask/port64, service next VSync; resume STI and normal acceptance",
+      "expected": "IMR2=0 IRR2=0 ISR2=1 accepted_count=1; no host delivery",
+      "preflight": [
+        "D01",
+        "D04"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 21,
+      "name": "ISR_ACROSS_FRAME",
+      "checkpoint": "0x2015",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "after guest port64 rearm (0x3004), honor two guest frame waits with IF=0",
+      "expected": "at least two VSyncs; ISR2=1 IRR2=0 count1 A=1",
+      "preflight": [
+        "D04"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 22,
+      "name": "EOI",
+      "checkpoint": "0x2016",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "freeze across actual guest specific EOI",
+      "expected": "ISR2=0 count1; A unaffected by EOI",
+      "preflight": [
+        "D05"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 23,
+      "name": "HLT_WAKE",
+      "checkpoint": "0x2017",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "0x3005 announces STI/HLT; freeze until actual halted CPU verified; advance next VSync via qualified service",
+      "expected": "normal wake; count2; savedIP=post-HLT label CS2000 IF1; entry1111/wake2222",
+      "preflight": [
+        "D07"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 24,
+      "name": "HLT_EOI",
+      "checkpoint": "0x2018",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "freeze across guest EOI and maskFF",
+      "expected": "ISR2=0 count2 EOI_count2; no extra acceptance",
+      "preflight": [
+        "D05"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 25,
+      "name": "FIFO_QUEUED",
+      "checkpoint": "0x2019",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "freeze while guest enqueues slave PITCH parameter, read both status ports",
+      "expected": "capture FIFO pre-drain bits separately from phase/busy; no command-time conversion",
+      "preflight": [
+        "C02"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 26,
+      "name": "FIFO_DRAINED",
+      "checkpoint": "0x201a",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "same fake time, next direct status reads",
+      "expected": "FIFO empty; unchanged bit5/6; busy remains separate",
+      "preflight": [
+        "C02"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 27,
+      "name": "SYNC_ALTERNATE",
+      "checkpoint": "0x201b",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "after new master P4=old+1, follow latched old segment and assigned next commit then two frame waits",
+      "expected": "host confirms new SYNC/R/H/D/V; no premature reanchor; raw scan sample matches resulting phase",
+      "preflight": [
+        "E01"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    },
+    {
+      "case": 28,
+      "name": "SYNC_RESTORED",
+      "checkpoint": "0x201c",
+      "assertion": "LEGACY_COMPATIBILITY_ASSERTION",
+      "action": "restore original geometry; same commit sequencing",
+      "expected": "host confirms restored geometry and exact settled phase",
+      "preflight": [
+        "E01"
+      ],
+      "status": "NOT_EXECUTABLE_UNTIL_MACHINE_TIME_GDC"
+    }
+  ],
+  "additional_host_cases": [
+    {
+      "id": "presentation_suppressed",
+      "preflight": [
+        "F01"
+      ],
+      "reuse_cases": [
+        12,
+        13,
+        14,
+        18,
+        19,
+        21,
+        27,
+        28
+      ],
+      "action": "repeat identical schedule with all host draw/presentation suppressed through future private adapter",
+      "expected": "same structured phase/PIC/IRQ/progress result and committed state; latest presentation state separately qualified"
+    },
+    {
+      "id": "fractional_and_partitioned",
+      "preflight": [
+        "A02",
+        "A08"
+      ],
+      "reuse_cases": [
+        2,
+        3,
+        4,
+        6,
+        7,
+        14
+      ],
+      "action": "repeat complete cold-boot runs; partition advances including sub-reference-quantum ns residues",
+      "expected": "same final phase/remainder/finite IRQ as single advance; no premature boundary"
+    },
+    {
+      "id": "frozen_repeat",
+      "preflight": [
+        "A01"
+      ],
+      "reuse_cases": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "action": "variant schedule gives all seven checkpoints same frozen time",
+      "expected": "same bit5/6 and finite IRQ despite guest CPU progress"
+    },
+    {
+      "id": "boundary_variants",
+      "preflight": [
+        "A03",
+        "A04",
+        "A05",
+        "A06"
+      ],
+      "reuse_cases": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "action": "repeat runs with monotone schedules sampling threshold/boundary tick-1,tick,tick+1; include F-1,F,F+1 and V-segment residue",
+      "expected": "exact reference_phase for both ports; selected samples only"
+    },
+    {
+      "id": "memory_wait_context",
+      "preflight": [
+        "F04"
+      ],
+      "reuse_cases": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "action": "host/model follow-up: inject no waits from runner; observe approved configured memory charge selectors at same phase",
+      "expected": "detailed charge qualification remains host/model work; N4 records phase/PIC/CPU context"
+    }
+  ],
+  "not_implemented_in_guest": [
+    "other PIC priority/EOI variants and IRQ0+IRQ2 composition",
+    "drawing-command start/duration; busy is sampled only",
+    "direct BIOS SYNC path and 24-to-31 transition ordering",
+    "recognized SEARCH_SYNC loop tests; N4 avoids idiom",
+    "palette journal/RASTER=1",
+    "save-state and existing integration regressions",
+    "provider invalid/backward input handling",
+    "blink/font/cursor/dirty generation and detailed renderer behavior"
+  ],
+  "nonclaims": [
+    "No future row executed by this fixture-only mission",
+    "No every-HSync-pulse capture",
+    "No AUDIO assertion",
+    "No physical Ne2/GD5428 qualification",
+    "RASTER=1_TIMING_OUT_OF_SCOPE"
+  ]
+}
