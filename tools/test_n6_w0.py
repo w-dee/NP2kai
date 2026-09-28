@@ -3,7 +3,7 @@
 from pathlib import Path
 import argparse,json,subprocess,shlex,hashlib,struct
 ROOT=Path(__file__).resolve().parents[1]
-CASES={1:'baseline',2:'single_csm_timer',3:'repeated_csm',4:'same_frontier_csm_key',5:'csm_frequency',6:'reset_epoch',7:'source_sync',8:'quiet_large_call',9:'quiet_split_calls',10:'active_partition',11:'active_split'}
+CASES={1:'baseline',2:'single_csm_timer',3:'repeated_csm',4:'same_frontier_csm_key',5:'csm_frequency',6:'reset_epoch',7:'source_sync',8:'quiet_large_call',9:'quiet_split_calls',10:'active_partition',11:'active_split',13:'same_frontier_two_csm'}
 HEADER=struct.Struct('<8s13I2Q');RECORD=struct.Struct('<9Q11I')
 FIELDS=['seq','parent','time_ns','service_ns','frame','call_id','cpu','last_before','last_after','kind','epoch','origin','reg','value','sub','requested','actual','remain_before','remain_after','aux']
 def hash_file(p):return hashlib.sha256(p.read_bytes()).hexdigest()

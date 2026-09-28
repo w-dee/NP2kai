@@ -198,6 +198,7 @@ static void run_case(unsigned which) {
  case 10: for(unsigned i=0;i<20;i++){gen(137);if(i%3==0)csm();if(i%5==0)reg(0xa2,0x40+i);}break;
  case 11: for(unsigned i=0;i<20;i++){for(unsigned j=0;j<137;j++)gen(1);if(i%3==0)csm();if(i%5==0)reg(0xa2,0x40+i);}break;
  case 12: for(unsigned i=0;i<17000;i++)gen(1);break; /* must invalidate capture */
+ case 13: gen(300);csm();csm();gen(1000);break; /* two CSM pairs at one producer frontier */
  default:die("unknown fixture case");
  }
 }
@@ -220,7 +221,7 @@ static void write_plan_records(const char *path,unsigned which,const WRecord *pl
  if(fclose(f)!=0)die("close record");}
 static void write_plan(const char *path,unsigned which){write_plan_records(path,which,records,nrecords);}
 static unsigned read_plan(const char *path){FILE*f=fopen(path,"rb");if(!f)die("open replay");char magic[8];if(fread(magic,1,8,f)!=8||memcmp(magic,W0_MAGIC,8))die("record magic");
- if(read32(f)!=W0_SCHEMA)die("unsupported schema version");unsigned which=read32(f);if(which<1||which>11)die("unknown fixture profile");
+ if(read32(f)!=W0_SCHEMA)die("unsupported schema version");unsigned which=read32(f);if(which<1||which>13)die("unknown fixture profile");
  if(read32(f)!=44100||read32(f)!=2||read32(f)!=4||read32(f)!=2457600||read32(f)!=20||read32(f)!=64||read32(f)!=1||read32(f)!=4||read32(f)!=0||read32(f)!=3||read32(f)!=0)die("profile metadata");
  initial_hash=read64(f);uint64_t count=read64(f);if(count==0||count>W0_RECORD_LIMIT)die("record capacity");nrecords=(uint32_t)count;
  for(unsigned i=0;i<nrecords;i++)records[i]=read_record(f);
@@ -303,7 +304,7 @@ int main(int argc,char**argv){
  if(argc!=5)die("usage: record CASE PATH PCM | replay MODE PATH PCM");
  opngen_initialize(44100);opngen_setvol(64);
  if(!strcmp(argv[1],"record")){
-  unsigned which=(unsigned)strtoul(argv[2],NULL,10);ensure(which>=1&&which<=12,"case");
+  unsigned which=(unsigned)strtoul(argv[2],NULL,10);ensure(which>=1&&which<=13,"case");
   nrecords=epoch=source_frame=source_total=call_id=0;next_sequence=0;recording=0;
   init_source(0);initial_hash=fingerprint(&g_opna[0].opngen);
   run_case(which);source_final_hash=fingerprint(&g_opna[0].opngen);
