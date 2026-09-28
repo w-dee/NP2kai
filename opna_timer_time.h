@@ -20,5 +20,8 @@ void opna_timer_time_reset(OPNA_TIMER_TIME *s, int clock8);
 void opna_timer_time_control(OPNA_TIMER_TIME *s, unsigned control, const uint32_t period[2]);
 unsigned opna_timer_time_observe(OPNA_TIMER_TIME *s, OPNA_TIMER_SAMPLE now, const uint32_t period[2]);
 int opna_timer_time_deadline(const OPNA_TIMER_TIME *s, unsigned timer, uint64_t *ns);
+/* Pure exact-rational preview for bounded CSM-history admission. */
+uint64_t opna_timer_time_expiries_until(const OPNA_TIMER_TIME *s, OPNA_TIMER_SAMPLE now, unsigned timer, uint32_t period);
+int opna_timer_time_nth_deadline(const OPNA_TIMER_TIME *s, unsigned timer, uint32_t period, uint64_t nth, uint64_t *ns);
 OPNA_TIMER_SAMPLE opna_timer_time_source(void);
 #endif

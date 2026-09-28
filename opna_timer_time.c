@@ -72,3 +72,35 @@ int opna_timer_time_deadline(const OPNA_TIMER_TIME *s, unsigned i, uint64_t *ns)
     *ns = s->anchor_ns + delta;
     return 1;
 }
+
+uint64_t opna_timer_time_expiries_until(const OPNA_TIMER_TIME *s, OPNA_TIMER_SAMPLE now, unsigned i, uint32_t period)
+{
+    uint64_t delta, part, ticks;
+    const OPNA_TIMER_CHANNEL *t;
+    if (i >= 2 || !period || !now.valid || !s->anchored || now.ns < s->anchor_ns ||
+        (s->numerator != 156 && s->numerator != 192)) return 0;
+    t = &s->timer[i];
+    if (!t->active) return 0;
+    delta = now.ns - s->anchor_ns;
+    part = (delta % DEN) * s->numerator + t->fraction;
+    ticks = (delta / DEN) * s->numerator + part / DEN;
+    if (ticks < t->remaining) return 0;
+    return 1 + (ticks - t->remaining) / period;
+}
+int opna_timer_time_nth_deadline(const OPNA_TIMER_TIME *s, unsigned i, uint32_t period, uint64_t nth, uint64_t *ns)
+{
+    uint64_t ticks, units, delta;
+    const OPNA_TIMER_CHANNEL *t;
+    if (i >= 2 || !period || !nth || !s->anchored ||
+        (s->numerator != 156 && s->numerator != 192)) return 0;
+    t = &s->timer[i];
+    if (!t->active || !t->remaining || t->fraction >= DEN ||
+        nth - 1 > (UINT64_MAX - t->remaining) / period) return 0;
+    ticks = t->remaining + (nth - 1) * period;
+    if (ticks > (UINT64_MAX - s->numerator + 1) / DEN) return 0;
+    units = ticks * DEN - t->fraction;
+    delta = (units + s->numerator - 1) / s->numerator;
+    if (delta > UINT64_MAX - s->anchor_ns) return 0;
+    *ns = s->anchor_ns + delta;
+    return 1;
+}

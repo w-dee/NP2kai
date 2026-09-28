@@ -111,7 +111,11 @@ void fmport_a(NEVENTITEM item)
 
 		if ((opna->s.reg[0x27] & 0xc0) == 0x80)
 		{
-			opngen_csm(&opna->opngen);
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME) && defined(NP2_OPNA_CSM_HISTORY)
+		if (opna != &g_opna[0]) opngen_csm(&opna->opngen);
+#else
+		opngen_csm(&opna->opngen);
+#endif
 		}
 	}
 }

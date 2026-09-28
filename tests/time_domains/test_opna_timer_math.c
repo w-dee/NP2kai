@@ -12,11 +12,18 @@ int main(void)
         for(n=0;n<20000;n++) {
             OPNA_TIMER_TIME a,b;
             uint32_t p[2]={1+random32()%45298,1+random32()%181194};
-            uint64_t t=(uint64_t)random32()*12345,cut=t/3,d;
+            uint64_t t=(uint64_t)random32()*12345,cut=t/3,d,preview,first,last,next;
             opna_timer_time_reset(&a,mode);
             opna_timer_time_observe(&a,(OPNA_TIMER_SAMPLE){7,1},p);
             opna_timer_time_control(&a,3,p);b=a;
+            preview=opna_timer_time_expiries_until(&b,(OPNA_TIMER_SAMPLE){t+7,1},0,p[0]);
+            if (preview) {
+                assert(opna_timer_time_nth_deadline(&b,0,p[0],1,&first) && first<=t+7);
+                assert(opna_timer_time_nth_deadline(&b,0,p[0],preview,&last) && last<=t+7);
+                assert(opna_timer_time_nth_deadline(&b,0,p[0],preview+1,&next) && next>t+7);
+            }
             opna_timer_time_observe(&a,(OPNA_TIMER_SAMPLE){t+7,1},p);
+            assert(a.expired[0]==preview);
             opna_timer_time_observe(&b,(OPNA_TIMER_SAMPLE){cut+7,1},p);
             opna_timer_time_observe(&b,(OPNA_TIMER_SAMPLE){t+7,1},p);
             assert(!memcmp(a.timer,b.timer,sizeof(a.timer)));
