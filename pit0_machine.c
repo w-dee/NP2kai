@@ -8,16 +8,20 @@
 #error PIT0 pilot requires the single-owner interpreter
 #endif
 PIT0_TIME pit0_machine_time;
-void pit0_machine_service(void)
+void pit0_machine_service_at(PIT0_SAMPLE now)
 {
     PITCH ch = pit.ch;
-    PIT0_EFFECT e = pit0_time_observe(&pit0_machine_time, pit0_time_source(),
+    PIT0_EFFECT e = pit0_time_observe(&pit0_machine_time, now,
         ch->value, (ch->ctrl & 0x0c) == 0x04,
         !!(ch->flag & PIT_FLAG_I), !!(pic.pi[0].imr & 1));
     if (e.armed) ch->flag |= PIT_FLAG_I;
     else ch->flag &= ~PIT_FLAG_I;
     if (e.irr_effect > 0) pic.pi[0].irr |= 1;
     else if (e.irr_effect < 0) pic.pi[0].irr &= ~1;
+}
+void pit0_machine_service(void)
+{
+    pit0_machine_service_at(pit0_time_source());
 }
 void pit0_machine_reset(void)
 {

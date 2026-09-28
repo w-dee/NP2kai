@@ -1,3 +1,4 @@
+#include <sdl/cpupacing.h>
 /*
  * Copyright (c) 2002-2003 NONAKA Kimihiro
  * All rights reserved.
@@ -174,6 +175,7 @@ ia32(void)
 		do {
 			exec_1step();
 			dmax86();
+			SDL_CPU_CHECKPOINT();
 		} while (CPU_REMCLOCK > 0);
 	}else{
 		do {
@@ -183,6 +185,7 @@ ia32(void)
 				INTERRUPT(1, INTR_TYPE_EXCEPTION);
 			}
 			dmax86();
+			SDL_CPU_CHECKPOINT();
 		} while (CPU_REMCLOCK > 0);
 	}
 
@@ -217,6 +220,7 @@ ia32_step(void)
 		if (dmac.working) {
 			dmax86();
 		}
+		SDL_CPU_CHECKPOINT();
 	} while (CPU_REMCLOCK > 0);
 }
 //#pragma optimize("", on)

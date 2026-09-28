@@ -21,6 +21,7 @@ int pit0_time_deadline(const PIT0_TIME *s, uint64_t *ns);
 PIT0_SAMPLE pit0_time_source(void);
 void pit0_machine_reset(void);
 void pit0_machine_service(void);
+void pit0_machine_service_at(PIT0_SAMPLE now);
 void pit0_machine_schedule(unsigned count);
 void pit0_machine_mask(void);
 void pit0_machine_ack(void);

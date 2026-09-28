@@ -1,4 +1,5 @@
 #include	<compiler.h>
+#include <gdc_machine.h>
 #include	<cpucore.h>
 #include <legacycpu.h>
 #include	<pccore.h>
@@ -1367,19 +1368,19 @@ const EGCQUAD	*data;
 
 REG8 MEMCALL memegc_rd8(UINT32 addr) {
 
-	legacy_cpu_charge(MEMWAIT_GRCG);
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));
 	return(egc_readbyte(addr));
 }
 
 void MEMCALL memegc_wr8(UINT32 addr, REG8 value) {
 
-	legacy_cpu_charge(MEMWAIT_GRCG);
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));
 	egc_writebyte(addr, value);
 }
 
 REG16 MEMCALL memegc_rd16(UINT32 addr) {
 
-	legacy_cpu_charge(MEMWAIT_GRCG);
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));
 	if (!(addr & 1)) {
 		return(egc_readword(addr));
 	}
@@ -1399,7 +1400,7 @@ REG16 MEMCALL memegc_rd16(UINT32 addr) {
 
 void MEMCALL memegc_wr16(UINT32 addr, REG16 value) {
 
-	legacy_cpu_charge(MEMWAIT_GRCG);
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));
 	if (!(addr & 1)) {
 		egc_writeword(addr, value);
 	}

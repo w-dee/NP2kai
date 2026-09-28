@@ -1,4 +1,8 @@
 #include <compiler.h>
+#include <sdl/cpupacing.h>
+#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+#include <cpucore.h>
+#endif
 #if defined(__LIBRETRO__)
 #include	"file_stream.h"
 #endif
@@ -243,7 +247,12 @@ changescreen(UINT8 newmode)
 
 // ---- proc
 
+#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+static uint64_t pacing_wait_ns;
+#define framereset(cnt) do { framecnt = 0; pacing_wait_ns = 0; } while (0)
+#else
 #define	framereset(cnt)		framecnt = 0
+#endif
 
 static void processwait(UINT cnt) {
 
@@ -270,7 +279,12 @@ static void processwait(UINT cnt) {
 			}
 		}
 #endif
+#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+        /* The legacy taskmng_sleep can spin when thread support is absent. */
+        SDL_Delay(1);
+#else
 		taskmng_sleep(1);
+#endif
 	}
 }
 
@@ -809,6 +823,22 @@ havemmx(void)
 #endif /* GCC_CPU_ARCH_IA32 */
 }
 
+#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+/* Keep the frame and interpreter stacks live across host-only pacing yields.
+ * Frontend events/reset remain at the ordinary non-reentrant frame boundary. */
+static void paced_exec(BOOL draw)
+{
+    if (!np2oscfg.NOWAIT)
+        sdl_cpu_pacing_begin(SDL_CPU_POSITION(),
+            (uint64_t)pccore.realclock * np2cfg.emuspeed / 100);
+    pccore_exec(draw);
+    sdl_cpu_pacing_end(SDL_CPU_POSITION());
+    if (!np2oscfg.NOWAIT) pacing_wait_ns += sdl_cpu_pacing.waited_ns;
+}
+#else
+#define paced_exec pccore_exec
+#endif
+
 static void np2exec()
 {
 	while(taskmng_isavail()) {
@@ -828,7 +858,7 @@ static void np2exec()
 #endif
 		if (np2oscfg.NOWAIT) {
 			joymng_sync();
-			pccore_exec(framecnt == 0);
+			paced_exec(framecnt == 0);
 			if (np2oscfg.DRAW_SKIP) {			// nowait frame skip
 				framecnt++;
 				if (framecnt >= np2oscfg.DRAW_SKIP) {
@@ -845,7 +875,7 @@ static void np2exec()
 		else if (np2oscfg.DRAW_SKIP) {		// frame skip
 			if (framecnt < np2oscfg.DRAW_SKIP) {
 				joymng_sync();
-				pccore_exec(framecnt == 0);
+				paced_exec(framecnt == 0);
 				framecnt++;
 			}
 			else {
@@ -856,9 +886,13 @@ static void np2exec()
 			if (!waitcnt) {
 				UINT cnt;
 				joymng_sync();
-				pccore_exec(framecnt == 0);
+				paced_exec(framecnt == 0);
 				framecnt++;
 				cnt = timing_getcount();
+#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+                cnt = sdl_cpu_pacing_work_count(timing_getcount_raw(),
+                    pacing_wait_ns, timing_getmsstep(), np2cfg.emuspeed * 128 / 100);
+#endif
 				if (framecnt > cnt) {
 					waitcnt = framecnt;
 					if (framemax > 1) {

@@ -1,3 +1,4 @@
+#include <sdl/cpupacing.h>
 /*
  * Copyright (c) 2002-2003 NONAKA Kimihiro
  * All rights reserved.
@@ -281,6 +282,8 @@ exec_allstep(void)
 	void (*func)(void);
 	
 	do {
+		/* Also covers the completed-opcode continue paths below. */
+		SDL_CPU_CHECKPOINT();
 
 		CPU_PREV_EIP = CPU_EIP;
 		CPU_STATSAVE.cpu_inst = CPU_STATSAVE.cpu_inst_default;

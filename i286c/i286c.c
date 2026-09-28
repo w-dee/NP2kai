@@ -1,3 +1,4 @@
+#include <sdl/cpupacing.h>
 #include	<compiler.h>
 #include	<cpucore.h>
 #include	"i286c.h"
@@ -315,6 +316,7 @@ void i286c(void) {
 				i286c_interrupt(1);
 			}
 			dmax86();
+			SDL_CPU_CHECKPOINT();
 		} while(I286_REMCLOCK > 0);
 	}
 	else if (dmac.working) {
@@ -325,6 +327,7 @@ void i286c(void) {
 			GET_PCBYTE(opcode);
 			i286op[opcode]();
 			dmax86();
+			SDL_CPU_CHECKPOINT();
 		} while(I286_REMCLOCK > 0);
 	}
 //#if defined(SUPPORT_ASYNC_CPU)
@@ -434,6 +437,7 @@ void i286c(void) {
 #endif
 			GET_PCBYTE(opcode);
 			i286op[opcode]();
+			SDL_CPU_CHECKPOINT();
 		} while(I286_REMCLOCK > 0);
 	}
 }

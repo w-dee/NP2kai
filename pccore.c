@@ -7,6 +7,7 @@
  */
 
 #include <compiler.h>
+#include <gdc_machine.h>
 #include <common/strres.h>
 #include <dosio.h>
 #include <soundmng.h>
@@ -1499,6 +1500,7 @@ static void drawscreen(void) {
   void(VRAMCALL * grphfn)(int page, int alldraw);
   UINT8 bit;
 
+#if !defined(NP2_GDC_MACHINE_TIME)
   tramflag.timing++;
   timing = ((LOADINTELWORD(gdc.m.para + GDC_CSRFORM + 1)) >> 5) & 0x3e;
   if (!timing) {
@@ -1514,6 +1516,11 @@ static void drawscreen(void) {
   if (gdcs.textdisp & GDCSCRN_EXT) {
     gdc_updateclock();
   }
+
+#endif
+#if defined(NP2_GDC_MACHINE_TIME)
+  if (!gdc_machine_present_allowed()) return;
+#endif
 
   if (!pcstat.drawframe) {
     return;
@@ -1551,10 +1558,12 @@ static void drawscreen(void) {
   }
   if (gdcs.grphdisp & GDCSCRN_EXT) {
     gdcs.grphdisp &= ~GDCSCRN_EXT;
+#if !defined(NP2_GDC_MACHINE_TIME)
     if (((gdc.clock & 0x80) && (gdc.clock != 0x83)) || (gdc.clock == 0x03)) {
       gdc.clock ^= 0x80;
       gdcs.grphdisp |= GDCSCRN_ALLDRAW2;
     }
+#endif
   }
   if (gdcs.grphdisp & GDCSCRN_ENABLE) {
     if (!(gdc.mode1 & 2)) {
@@ -1644,6 +1653,43 @@ static void drawscreen(void) {
   }
 }
 
+#if defined(NP2_GDC_MACHINE_TIME)
+/* Legacy CPU-time heartbeat only: no scan, IRQ2, command or blink work. */
+void screendisp(NEVENTITEM item) {
+  pcstat.screendispflag=0;
+  (void)item;
+}
+void screenvsync(NEVENTITEM item) {
+  nevent_set(NEVENT_FLAMES, gdc_machine.heartbeat_vertical, screendisp, NEVENT_RELATIVE);
+  (void)item;
+}
+void gdc_machine_blink(uint64_t frames) {
+  uint64_t changes, total;
+  unsigned threshold, i;
+  if (!frames) return;
+  threshold=(LOADINTELWORD(gdc.m.para+GDC_CSRFORM+1)>>5)&0x3e;
+  if (!threshold) threshold=64;
+  /* Preserve first UINT8 increment/wrap, including shortened thresholds. */
+  tramflag.timing++;
+  if (tramflag.timing>=threshold) {
+    tramflag.timing=0; tramflag.count++;
+    tramflag.renewal|=((tramflag.count^2)&2)|1;
+  }
+  total=(uint64_t)tramflag.timing+frames-1;
+  changes=total/threshold;
+  tramflag.timing=(UINT8)(total%threshold);
+  if (changes>=4) {
+    tramflag.renewal|=3; tramflag.count+=(UINT8)changes;
+  } else for (i=0;i<changes;i++) {
+    tramflag.count++; tramflag.renewal|=((tramflag.count^2)&2)|1;
+  }
+}
+void gdc_machine_present(void) {
+  if (!pcstat.drawframe || !gdc_machine_present_allowed()) return;
+  drawscreen();
+  gdc_machine_present_done();
+}
+#else
 void screendisp(NEVENTITEM item) {
 
   PICITEM pi;
@@ -1683,6 +1729,7 @@ void screenvsync(NEVENTITEM item) {
   }
   (void)item;
 }
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -1897,6 +1944,12 @@ void pccore_exec(BOOL draw) {
   }
 #endif
 
+#if defined(NP2_GDC_MACHINE_TIME)
+  gdc_machine_service();
+  gdc_machine_present();
+  pcstat.screendispflag = 1;
+  nevent_set(NEVENT_FLAMES, gdc_machine.heartbeat_display, screenvsync, NEVENT_RELATIVE);
+#else
   gdc.vsync = 0;
   pcstat.screendispflag = 1;
   MEMWAIT_TRAM = np2cfg.wait[0];
@@ -1904,6 +1957,7 @@ void pccore_exec(BOOL draw) {
   MEMWAIT_GRCG = np2cfg.wait[4];
 
   nevent_set(NEVENT_FLAMES, gdc.dispclock, screenvsync, NEVENT_RELATIVE);
+#endif
 
   //	nevent_get1stevent();
 

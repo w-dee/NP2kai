@@ -1,4 +1,5 @@
 #include	<compiler.h>
+#include <gdc_machine.h>
 #include	<cpucore.h>
 #include	<pccore.h>
 #include	<io/iocore.h>
@@ -132,6 +133,7 @@ static UINT16 keyget(void) {
 // ---- master
 
 void bios0x18_0a(REG8 mode) {
+	GDC_SERVICE();
 
 const CRTDATA	*crt;
 
@@ -192,6 +194,7 @@ const CRTDATA	*crt;
 }
 
 void bios0x18_0c(void) {
+	GDC_SERVICE();
 
 	if (!(gdcs.textdisp & GDCSCRN_ENABLE)) {
 		gdcs.textdisp |= GDCSCRN_ENABLE;
@@ -200,6 +203,7 @@ void bios0x18_0c(void) {
 }
 
 static void bios0x18_0f(UINT seg, UINT off, REG8 num, REG8 cnt) {
+	GDC_SERVICE();
 
 	UINT8	*p;
 	UINT	raster;
@@ -245,6 +249,7 @@ static void bios0x18_0f(UINT seg, UINT off, REG8 num, REG8 cnt) {
 }
 
 void bios0x18_10(REG8 curdel) {
+	GDC_SERVICE();
 
 	UINT8	sts;
 	UINT	pos;
@@ -263,6 +268,7 @@ void bios0x18_10(REG8 curdel) {
 }
 
 REG16 bios0x18_14(REG16 seg, REG16 off, REG16 code) {
+	GDC_SERVICE();
 
 	UINT16	size;
 const UINT8	*p;
@@ -312,6 +318,7 @@ const UINT8	*p;
 }
 
 static void bios0x18_1a(REG16 seg, REG16 off, REG16 code) {
+	GDC_SERVICE();
 
 	UINT8	*p;
 	UINT8	buf[32];
@@ -331,6 +338,7 @@ static void bios0x18_1a(REG16 seg, REG16 off, REG16 code) {
 }
 
 void bios0x18_16(REG8 chr, REG8 atr) {
+	GDC_SERVICE();
 
 	UINT32	i;
 
@@ -349,6 +357,7 @@ void bios0x18_16(REG8 chr, REG8 atr) {
 
 #if defined(SUPPORT_CRT31KHZ)
 static REG8 bios0x18_30(REG8 rate, REG8 scrn) {
+	GDC_SERVICE();
 
 	int			crt;
 	int			master;
@@ -483,6 +492,7 @@ const CRTDATA	*p;
 			gdc.s.para[GDC_PITCH] = 80;
 		}
 		gdc.clock |= 3;
+		GDC_CLOCK_DIRTY();
 		mem[MEMB_PRXDUPD] |= 0x04;
 		gdc.s.para[GDC_SCROLL+3] = 0x40;
 	}
@@ -498,6 +508,7 @@ const CRTDATA	*p;
 			gdc.s.para[GDC_PITCH] = 40;
 		}
 		gdc.clock &= ~3;
+		GDC_CLOCK_DIRTY();
 		mem[MEMB_PRXDUPD] &= ~0x04;
 	}
 	if ((scrn & 0x30) == 0x10) {
@@ -543,6 +554,7 @@ const CRTDATA	*p;
 }
 
 static REG8 bios0x18_31al(void) {
+	GDC_SERVICE();
 
 	UINT8	rate;
 
@@ -551,6 +563,7 @@ static REG8 bios0x18_31al(void) {
 }
 
 static REG8 bios0x18_31bh(void) {
+	GDC_SERVICE();
 
 	UINT8	scrn;
 
@@ -569,6 +582,7 @@ static REG8 bios0x18_31bh(void) {
 // ---- slave
 
 void bios0x18_40(void) {
+	GDC_SERVICE();
 
 	gdc_forceready(GDCWORK_SLAVE);
 	if (!(gdcs.grphdisp & GDCSCRN_ENABLE)) {
@@ -579,6 +593,7 @@ void bios0x18_40(void) {
 }
 
 void bios0x18_41(void) {
+	GDC_SERVICE();
 
 	gdc_forceready(GDCWORK_SLAVE);
 	if (gdcs.grphdisp & GDCSCRN_ENABLE) {
@@ -589,6 +604,7 @@ void bios0x18_41(void) {
 }
 
 void bios0x18_42(REG8 mode) {
+	GDC_SERVICE();
 
 	UINT8	crtmode;
 #if defined(SUPPORT_CRT31KHZ)
@@ -616,6 +632,7 @@ void bios0x18_42(REG8 mode) {
 			if ((mem[MEMB_PRXDUPD] & 0x24) == 0x20) {
 				mem[MEMB_PRXDUPD] ^= 4;
 				gdc.clock |= 3;
+				GDC_CLOCK_DIRTY();
 				CopyMemory(gdc.s.para + GDC_SYNC, gdcslavesync[3], 8);
 				gdc.s.para[GDC_PITCH] = 80;
 				gdcs.grphdisp |= GDCSCRN_EXT;
@@ -632,6 +649,7 @@ void bios0x18_42(REG8 mode) {
 			if ((mem[MEMB_PRXDUPD] & 0x24) == 0x24) {
 				mem[MEMB_PRXDUPD] ^= 4;
 				gdc.clock &= ~3;
+				GDC_CLOCK_DIRTY();
 #if defined(SUPPORT_CRT31KHZ)
 				if (rate & 4) slave = 4;
 				else
@@ -743,6 +761,7 @@ static void setbiosgdc(UINT32 csrw, const GDCVECT *vect, UINT8 ope) {
 
 /*	����������	������(2ch?)�Ō��J���ꂽ�\�[�X	*/
 static void bios0x18_45(void) {
+	GDC_SERVICE();
 
 	UCWTBL		ucw;
 	UINT		i;
@@ -824,6 +843,7 @@ static void bios0x18_45(void) {
 /*	�������܂�	������(2ch?)�Ō��J���ꂽ�\�[�X	*/
 
 static void bios0x18_47(void) {
+	GDC_SERVICE();
 
 	UCWTBL		ucw;
 	GDCVECT		vect;
@@ -940,6 +960,7 @@ static void bios0x18_47(void) {
 }
 
 static void bios0x18_49(void) {
+	GDC_SERVICE();
 
 	UCWTBL		ucw;
 	UINT		i;
@@ -1002,6 +1023,7 @@ static void bios0x18_49(void) {
 
 #if defined(SUPPORT_PC9821)
 static void bios0x18_4d(REG8 mode) {
+	GDC_SERVICE();
 
 	if ((mem[0x45c] & 0x40) &&
 		((mem[MEMB_CRT_BIOS] & 3) == 2)) {
@@ -1025,6 +1047,7 @@ static void bios0x18_4d(REG8 mode) {
 // ----
 
 void bios0x18(void) {
+	GDC_SERVICE();
 
 	union {
 		BOOL	b;

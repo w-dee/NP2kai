@@ -237,6 +237,8 @@ file(GLOB_RECURSE NP2kai_temp "${CMAKE_CURRENT_SOURCE_DIR}/i386hax/*.c")
 list(APPEND NP2kai_HAXM_sources ${NP2kai_temp})
 
 file(GLOB NP2kai_temp "${CMAKE_CURRENT_SOURCE_DIR}/sdl/*.c")
+# Added explicitly only by the live GDC pilot below.
+list(REMOVE_ITEM NP2kai_temp "${CMAKE_CURRENT_SOURCE_DIR}/sdl/cpupacing.c")
 list(APPEND NP2kai_SDL_sources ${NP2kai_temp})
 file(GLOB_RECURSE NP2kai_temp "${CMAKE_CURRENT_SOURCE_DIR}/embed/*.c")
 list(APPEND NP2kai_SDL_sources ${NP2kai_temp})
@@ -518,6 +520,44 @@ if(NP2_PIT_PIC_MACHINE_TIME)
         list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/pit0_time_fake.c")
     else()
         list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/pit0_time_posix.c")
+    endif()
+endif()
+
+# Private GDC compatibility pilot; cold-boot display identity is independent
+# of the runtime CPU base/multiplier. No product INI/runtime switch.
+option(NP2_GDC_MACHINE_TIME "Experimental GDC scan/display machine time" OFF)
+option(NP2_GDC_FAKE_TIME "Private deterministic GDC qualification source" OFF)
+set(NP2_GDC_PROFILE_BASE "2457600" CACHE STRING "Fixed GDC compatibility B_ref")
+if(NP2_GDC_FAKE_TIME AND NOT NP2_GDC_MACHINE_TIME)
+    message(FATAL_ERROR "GDC fake source requires GDC machine time")
+endif()
+if(NP2_GDC_MACHINE_TIME)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT BUILD_SDL OR
+       BUILD_WX OR BUILD_X OR BUILD_LIBRETRO OR USE_ASYNCCPU OR USE_HAXM OR
+       NOT USE_SDL EQUAL 2)
+        message(FATAL_ERROR "GDC pilot requires Linux SDL2 single-owner interpreter")
+    endif()
+    if(NOT NP2_GDC_PROFILE_BASE STREQUAL "1996800" AND NOT NP2_GDC_PROFILE_BASE STREQUAL "2457600")
+        message(FATAL_ERROR "GDC B_ref must be 1996800 or 2457600")
+    endif()
+    add_definitions(-DNP2_GDC_MACHINE_TIME -DNP2_GDC_PROFILE_BASE=${NP2_GDC_PROFILE_BASE})
+    # Bind the private qualification ABI to all materially touched sources.
+    set(gdc_contract_inputs pit0_time.h pit0_machine.c gdc_time.h gdc_time.c gdc_time_fake.c gdc_time_posix.c gdc_machine.h gdc_machine.c pccore.c io/gdc.c io/pic.c bios/bios18.c bios/bios1c.c mem/memtram.c mem/memvram.c mem/memegc.c statsave.c CMakeLists.txt sdl/cpupacing.h sdl/cpupacing.c sdl/np2.c i286c/i286c.c i286c/v30patch.c i386c/ia32/interface.c i386c/ia32/cpu.c)
+    set(gdc_contract_text "")
+    foreach(gdc_input IN LISTS gdc_contract_inputs)
+        file(SHA256 "${CMAKE_CURRENT_SOURCE_DIR}/${gdc_input}" gdc_input_hash)
+        string(APPEND gdc_contract_text "${gdc_input}:${gdc_input_hash}\n")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${gdc_input}")
+    endforeach()
+    string(SHA256 gdc_contract_id "${gdc_contract_text}")
+    add_definitions(-DNP2_GDC_SOURCE_ID="${gdc_contract_id}")
+
+    list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/gdc_time.c" "${CMAKE_CURRENT_SOURCE_DIR}/gdc_machine.c")
+    if(NP2_GDC_FAKE_TIME)
+        add_definitions(-DNP2_GDC_FAKE_TIME)
+        list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/gdc_time_fake.c")
+    else()
+        list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/gdc_time_posix.c" "${CMAKE_CURRENT_SOURCE_DIR}/sdl/cpupacing.c")
     endif()
 endif()
 

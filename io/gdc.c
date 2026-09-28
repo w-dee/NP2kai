@@ -1,4 +1,5 @@
 #include	<compiler.h>
+#include <gdc_machine.h>
 #include	<scrnmng.h>
 #include	<cpucore.h>
 #include <legacycpu.h>
@@ -17,10 +18,12 @@
 #include	<i386hax/haxcore.h>
 #endif
 
-#if !defined(CPUCORE_IA32)
+#if !defined(CPUCORE_IA32) && !defined(NP2_GDC_MACHINE_TIME)
 #define	SEARCH_SYNC
 #endif
+#if !defined(NP2_GDC_MACHINE_TIME)
 #define	TURE_SYNC
+#endif
 
 typedef struct {
 	UINT32	clock;
@@ -357,6 +360,7 @@ void gdc_work(int id) {
 
 // BIOSとかで弄った時にリセット
 void gdc_forceready(int id) {
+	GDC_SERVICE();
 
 	GDCDATA	item;
 	item = (id == GDCWORK_MASTER)?&gdc.m:&gdc.s;
@@ -439,6 +443,9 @@ const GDCCLK	*clk;
 	gdc.dispclock = gdc.rasterclock * lf;
 	gdc.vsyncclock = cnt - gdc.dispclock;
 	timing_setrate(y, hclock);
+#if defined(NP2_GDC_MACHINE_TIME)
+	gdc_machine_clock_commit();
+#endif
 }
 
 void gdc_restorekacmode(void) {
@@ -456,6 +463,7 @@ void gdc_restorekacmode(void) {
 // ---- I/O master
 
 static void IOOUTCALL gdc_o60(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	if (gdc.m.cnt < GDCCMD_MAX) {
 		gdc.m.fifo[gdc.m.cnt++] = dat;
@@ -464,6 +472,7 @@ static void IOOUTCALL gdc_o60(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o62(UINT port, REG8 dat) {
+	GDC_SERVICE();
 	
 	if (gdc.m.cnt < GDCCMD_MAX) {
 		gdc.m.fifo[gdc.m.cnt++] = 0x100 | dat;
@@ -473,6 +482,7 @@ static void IOOUTCALL gdc_o62(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o64(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	gdc.vsyncint = 1;
 	(void)port;
@@ -480,6 +490,7 @@ static void IOOUTCALL gdc_o64(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o68(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	REG8	bit;
 	
@@ -513,6 +524,7 @@ static void IOOUTCALL gdc_o68(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o6a(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	REG8	bit;
 
@@ -583,21 +595,25 @@ static void IOOUTCALL gdc_o6a(UINT port, REG8 dat) {
 
 			case 0x82:
 				gdc.clock &= ~1;
+				GDC_CLOCK_DIRTY();
 				gdcs.grphdisp |= GDCSCRN_EXT;
 				break;
 
 			case 0x83:
 				gdc.clock |= 1;
+				GDC_CLOCK_DIRTY();
 				gdcs.grphdisp |= GDCSCRN_EXT;
 				break;
 
 			case 0x84:
 				gdc.clock &= ~2;
+				GDC_CLOCK_DIRTY();
 				gdcs.grphdisp |= GDCSCRN_EXT;
 				break;
 
 			case 0x85:
 				gdc.clock |= 2;
+				GDC_CLOCK_DIRTY();
 				gdcs.grphdisp |= GDCSCRN_EXT;
 				break;
 		}
@@ -606,6 +622,7 @@ static void IOOUTCALL gdc_o6a(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o6e(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	switch(dat) {
 		case 0:
@@ -624,6 +641,9 @@ static void IOOUTCALL gdc_o6e(UINT port, REG8 dat) {
 static REG8 IOINPCALL gdc_i60(UINT port) {
 
 	REG8	ret;
+#if defined(NP2_GDC_MACHINE_TIME)
+	ret = 0x80 | gdc_machine_status();
+#else
 	SINT32	remain;
 
 	ret = 0x80 | gdc.vsync;		// | m_drawing;
@@ -633,6 +653,7 @@ static REG8 IOINPCALL gdc_i60(UINT port) {
 			ret |= 0x40;
 		}
 	}
+#endif
 	if (gdc.m.snd) {
 		ret |= 0x01;
 	}
@@ -683,6 +704,7 @@ static REG8 IOINPCALL gdc_i60(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_i62(UINT port) {
+	GDC_SERVICE();
 
 	if (gdc.m.snd) {
 		gdc.m.snd--;
@@ -693,12 +715,14 @@ static REG8 IOINPCALL gdc_i62(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_i68(UINT port) {
+	GDC_SERVICE();
 
 	(void)port;
 	return(gdc.mode1);
 }
 
 static REG8 IOINPCALL gdc_i6a(UINT port) {
+	GDC_SERVICE();
 
 	(void)port;
 	return(gdc.mode2);
@@ -708,6 +732,7 @@ static REG8 IOINPCALL gdc_i6a(UINT port) {
 // ---- I/O slave
 
 static void IOOUTCALL gdc_oa0(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	if (gdc.s.cnt < GDCCMD_MAX) {
 		gdc.s.fifo[gdc.s.cnt++] = dat;
@@ -720,6 +745,7 @@ static void IOOUTCALL gdc_oa0(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oa2(UINT port, REG8 dat) {
+	GDC_SERVICE();
 	
 	if (gdc.s.cnt < GDCCMD_MAX) {
 		gdc.s.fifo[gdc.s.cnt++] = 0x100 | dat;
@@ -730,6 +756,7 @@ static void IOOUTCALL gdc_oa2(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oa4(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	if ((gdcs.disp ^ dat) & 1) {
 		gdcs.disp = dat & 1;
@@ -739,6 +766,7 @@ static void IOOUTCALL gdc_oa4(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oa6(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	dat = dat & 1;
 	if (gdcs.access != dat) {
@@ -753,6 +781,9 @@ static void IOOUTCALL gdc_oa6(UINT port, REG8 dat) {
 static REG8 IOINPCALL gdc_ia0(UINT port) {
 
 	REG8	ret;
+#if defined(NP2_GDC_MACHINE_TIME)
+	ret = 0x80 | gdc_machine_status() | gdc.s_drawing;
+#else
 	SINT32	remain;
 
 	ret = 0x80 | gdc.vsync | gdc.s_drawing;
@@ -762,6 +793,7 @@ static REG8 IOINPCALL gdc_ia0(UINT port) {
 			ret |= 0x40;
 		}
 	}
+#endif
 	if (gdc.s.snd) {
 		ret |= 0x01;
 	}
@@ -812,6 +844,7 @@ static REG8 IOINPCALL gdc_ia0(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_ia2(UINT port) {
+	GDC_SERVICE();
 
 	if (gdc.s.snd) {
 		gdc.s.snd--;
@@ -822,12 +855,14 @@ static REG8 IOINPCALL gdc_ia2(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_ia4(UINT port) {
+	GDC_SERVICE();
 
 	(void)port;
 	return(gdcs.disp);
 }
 
 static REG8 IOINPCALL gdc_ia6(UINT port) {
+	GDC_SERVICE();
 
 	(void)port;
 	return(gdcs.access);
@@ -837,6 +872,7 @@ static REG8 IOINPCALL gdc_ia6(UINT port) {
 // ---- I/O palette
 
 static void IOOUTCALL gdc_oa8(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	if (gdc.analog & ((1 << GDCANALOG_256) + (1 << GDCANALOG_16))) {
 		gdc.palnum = dat;
@@ -848,6 +884,7 @@ static void IOOUTCALL gdc_oa8(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oaa(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 #if defined(SUPPORT_PC9821)
 	if (gdc.analog & (1 << GDCANALOG_256)) {
@@ -869,6 +906,7 @@ static void IOOUTCALL gdc_oaa(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oac(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 #if defined(SUPPORT_PC9821)
 	if (gdc.analog & (1 << GDCANALOG_256)) {
@@ -890,6 +928,7 @@ static void IOOUTCALL gdc_oac(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oae(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 #if defined(SUPPORT_PC9821)
 	if (gdc.analog & (1 << GDCANALOG_256)) {
@@ -912,6 +951,7 @@ static void IOOUTCALL gdc_oae(UINT port, REG8 dat) {
 
 #if defined(SUPPORT_PC9821)
 static REG8 IOINPCALL gdc_ia8(UINT port) {
+	GDC_SERVICE();
 
 	if (gdc.analog & ((1 << GDCANALOG_256) + (1 << GDCANALOG_16))) {
 		return(gdc.palnum);
@@ -921,6 +961,7 @@ static REG8 IOINPCALL gdc_ia8(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_iaa(UINT port) {
+	GDC_SERVICE();
 
 	if (gdc.analog & (1 << GDCANALOG_256)) {
 		return(gdc.anareg[(16 * 3) + (gdc.palnum * 4) + 0]);
@@ -933,6 +974,7 @@ static REG8 IOINPCALL gdc_iaa(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_iac(UINT port) {
+	GDC_SERVICE();
 
 	if (gdc.analog & (1 << GDCANALOG_256)) {
 		return(gdc.anareg[(16 * 3) + (gdc.palnum * 4) + 1]);
@@ -945,6 +987,7 @@ static REG8 IOINPCALL gdc_iac(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_iae(UINT port) {
+	GDC_SERVICE();
 
 	if (gdc.analog & (1 << GDCANALOG_256)) {
 		return(gdc.anareg[(16 * 3) + (gdc.palnum * 4) + 2]);
@@ -962,12 +1005,14 @@ static REG8 IOINPCALL gdc_iae(UINT port) {
 
 #if defined(SUPPORT_PC9821)
 static void IOOUTCALL gdc_o9a0(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	gdc.ff2 = dat;
 	(void)port;
 }
 
 static REG8 IOINPCALL gdc_i9a0(UINT port) {
+	GDC_SERVICE();
 
 	REG8	ret;
 
@@ -1029,6 +1074,7 @@ static REG8 IOINPCALL gdc_i9a0(UINT port) {
 
 #if defined(SUPPORT_CRT31KHZ)
 static void IOOUTCALL gdc_o9a8(UINT port, REG8 dat) {
+	GDC_SERVICE();
 
 	if ((gdc.display ^ (dat << GDCDISP_31)) & (1 << GDCDISP_31)) {
 		gdc.display ^= (1 << GDCDISP_31);
@@ -1038,6 +1084,7 @@ static void IOOUTCALL gdc_o9a8(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL gdc_i9a8(UINT port) {
+	GDC_SERVICE();
 
 	(void)port;
 	return((gdc.display >> GDCDISP_31) & 1);
@@ -1071,6 +1118,7 @@ static const IOINP gdcia0[8] = {
 
 
 void gdc_biosreset(void) {
+	GDC_SERVICE();
 
 #if defined(SUPPORT_PC9821)
 	UINT	i;
@@ -1104,6 +1152,7 @@ void gdc_biosreset(void) {
 	gdc_vectreset(&gdc.s);
 
 	gdc.clock = 0;
+	GDC_CLOCK_RESET();
 	gdc.m.para[GDC_PITCH] = 80;
 	gdc.s.para[GDC_PITCH] = 40;
 
@@ -1157,6 +1206,9 @@ void gdc_biosreset(void) {
 }
 
 void gdc_reset(const NP2CFG *pConfig) {
+#if defined(NP2_GDC_MACHINE_TIME)
+	gdc_machine_reset();
+#endif
 
 	ZeroMemory(&gdc, sizeof(gdc));
 	ZeroMemory(&gdcs, sizeof(gdcs));

@@ -1,4 +1,5 @@
 #include	<compiler.h>
+#include <gdc_machine.h>
 #if defined(NP2_PIT_PIC_MACHINE_TIME)
 #include <pit0_time.h>
 #endif
@@ -70,7 +71,9 @@ void pic_irq(void) {
 	REG8	bit;
 	REG8	slave;
 
-#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#if defined(NP2_GDC_MACHINE_TIME)
+	gdc_machine_pic_service();
+#elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
 	// 割込み許可？
@@ -144,7 +147,9 @@ void pic_irq(void) {												// ver0.78
 	REG8	slave;
 	UINT8	intrtmp;
 
-#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#if defined(NP2_GDC_MACHINE_TIME)
+	gdc_machine_pic_service();
+#elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
 	// 割込み許可？
@@ -308,7 +313,9 @@ static void IOOUTCALL pic_o00(UINT port, REG8 dat) {
 	REG8	level;
 	UINT8	ocw3;
 
-#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#if defined(NP2_GDC_MACHINE_TIME)
+	gdc_machine_pic_service();
+#elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
 	pic_enter_criticalsection();
@@ -371,7 +378,9 @@ static void IOOUTCALL pic_o02(UINT port, REG8 dat) {
 
 	PICITEM		picp;
 	
-#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#if defined(NP2_GDC_MACHINE_TIME)
+	gdc_machine_pic_service();
+#elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
 	pic_enter_criticalsection();
@@ -405,7 +414,9 @@ static REG8 IOINPCALL pic_i00(UINT port) {
 
 	PICITEM		picp;
 
-#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#if defined(NP2_GDC_MACHINE_TIME)
+	gdc_machine_pic_service();
+#elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
 	picp = &pic.pi[(port >> 3) & 1];
@@ -421,7 +432,9 @@ static REG8 IOINPCALL pic_i02(UINT port) {
 
 	PICITEM		picp;
 
-#if defined(NP2_PIT_PIC_MACHINE_TIME)
+#if defined(NP2_GDC_MACHINE_TIME)
+	gdc_machine_pic_service();
+#elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
 	picp = &pic.pi[(port >> 3) & 1];

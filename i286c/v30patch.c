@@ -1,3 +1,4 @@
+#include <sdl/cpupacing.h>
 #include	<compiler.h>
 #include	<cpucore.h>
 #include	"i286c.h"
@@ -947,6 +948,7 @@ void v30c(void) {
 				i286c_interrupt(1);
 			}
 			dmav30();
+			SDL_CPU_CHECKPOINT();
 		} while(I286_REMCLOCK > 0);
 	}
 	else if (dmac.working) {
@@ -957,6 +959,7 @@ void v30c(void) {
 			GET_PCBYTE(opcode);
 			v30op[opcode]();
 			dmav30();
+			SDL_CPU_CHECKPOINT();
 		} while(I286_REMCLOCK > 0);
 	}
 	else {
@@ -966,6 +969,7 @@ void v30c(void) {
 #endif
 			GET_PCBYTE(opcode);
 			v30op[opcode]();
+			SDL_CPU_CHECKPOINT();
 		} while(I286_REMCLOCK > 0);
 	}
 }

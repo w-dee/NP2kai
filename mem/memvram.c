@@ -1,4 +1,5 @@
 #include	<compiler.h>
+#include <gdc_machine.h>
 #include	<cpucore.h>
 #include <legacycpu.h>
 #include	<pccore.h>
@@ -10,24 +11,24 @@
 // ---- macros
 
 #define	VRAMRD8(p, a) {												\
-	legacy_cpu_charge(MEMWAIT_VRAM);									\
+	legacy_cpu_charge(GDC_WAIT(1, MEMWAIT_VRAM));									\
 	return(mem[(a) + ((p) * VRAM_STEP)]);							\
 }
 
 #define VRAMRD16(p, a) {											\
-	legacy_cpu_charge(MEMWAIT_VRAM);									\
+	legacy_cpu_charge(GDC_WAIT(1, MEMWAIT_VRAM));									\
 	return(LOADINTELWORD(mem + (a) + ((p) * VRAM_STEP)));			\
 }
 
 #define VRAMWR8(p, a, v) {											\
-	legacy_cpu_charge(MEMWAIT_VRAM);									\
+	legacy_cpu_charge(GDC_WAIT(1, MEMWAIT_VRAM));									\
 	mem[(a) + ((p) * VRAM_STEP)] = (UINT8)(v);						\
 	vramupdate[LOW15(a)] |= (1 << (p));								\
 	gdcs.grphdisp |= (1 << (p));									\
 }
 
 #define VRAMWR16(p, a, v) {											\
-	legacy_cpu_charge(MEMWAIT_VRAM);									\
+	legacy_cpu_charge(GDC_WAIT(1, MEMWAIT_VRAM));									\
 	STOREINTELWORD(mem + (a) + ((p) * VRAM_STEP), (v));				\
 	vramupdate[LOW15(a)] |= (1 << (p));								\
 	vramupdate[LOW15((a) + 1)] |= (1 << (p));						\
@@ -38,7 +39,7 @@
 #define RMWWR8(p, a, v) {											\
 	REG8	mask;													\
 	UINT8	*vram;													\
-	legacy_cpu_charge(MEMWAIT_GRCG);									\
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));									\
 	mask = ~value;													\
 	(a) = LOW15((a));												\
 	vramupdate[(a)] |= (1 << (p));									\
@@ -64,7 +65,7 @@
 
 #define RMWWR16(p, a, v) {											\
 	UINT8	*vram;													\
-	legacy_cpu_charge(MEMWAIT_GRCG);									\
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));									\
 	(a) = LOW15((a));												\
 	vramupdate[(a) + 0] |= (1 << (p));								\
 	vramupdate[(a) + 1] |= (1 << (p));								\
@@ -111,7 +112,7 @@
 
 #define TDWWR8(p, a, v) {											\
 	UINT8	*vram;													\
-	legacy_cpu_charge(MEMWAIT_GRCG);									\
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));									\
 	(a) = LOW15(a);													\
 	vramupdate[(a)] |= (1 << (p));									\
 	gdcs.grphdisp |= (1 << (p));									\
@@ -133,7 +134,7 @@
 
 #define TDWWR16(p, a, v) {											\
 	UINT8	*vram;													\
-	legacy_cpu_charge(MEMWAIT_GRCG);									\
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));									\
 	(a) = LOW15(a);													\
 	vramupdate[(a) + 0] |= (1 << (p));								\
 	vramupdate[(a) + 1] |= (1 << (p));								\
@@ -162,7 +163,7 @@
 #define TCRRD8(p, a) {												\
 const UINT8	*vram;													\
 	REG8	ret;													\
-	legacy_cpu_charge(MEMWAIT_GRCG);									\
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));									\
 	vram = mem + LOW15(a) + ((p) * VRAM_STEP);						\
 	ret = 0;														\
 	if (!(grcg.modereg & 1)) {										\
@@ -183,7 +184,7 @@ const UINT8	*vram;													\
 #define TCRRD16(p, a) {												\
 const UINT8	*vram;													\
 	REG16	ret;													\
-	legacy_cpu_charge(MEMWAIT_GRCG);									\
+	legacy_cpu_charge(GDC_WAIT(2, MEMWAIT_GRCG));									\
 	ret = 0;														\
 	vram = mem + LOW15(a) + ((p) * VRAM_STEP);						\
 	if (!(grcg.modereg & 1)) {										\
