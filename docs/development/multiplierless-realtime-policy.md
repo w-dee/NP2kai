@@ -220,3 +220,29 @@ normalization removes legacy CPU/read-cadence dependence; it is not covered by a
 claim of unchanged legacy semantics or hardware qualification. Default OFF keeps
 the existing path. The bounded fake-time pilot grants no time authority to other
 devices and no Linux/P4 deadline or host-arrival mapping policy.
+
+## Owner-approved remaining Tier1 decisions
+
+The [bounded Tier1 qualification profile](tier1-machine-time.md) implements
+three additional owner decisions, default OFF:
+
+- **D1:** generic DMA is CPU/bus-synchronous compatibility. A transfer opportunity
+  is an ordering/arbitration event, with no machine-time pacing. No opportunity
+  means no transfer. Guest HLT behavior is qualified per backend rather than
+  equated with a completely held CPU/bus owner.
+- **D2:** residual Tier1 durations use source-specific normalized machine time.
+  Raw C-cycle constants become C/B seconds; expressions
+  `floor(X*M/Q)+Y*M` in B*M cycles become exact `X/(Q*B)+Y/B`.
+  Audited exec-pass countdowns use semantic frames of5/282 second. Source
+  epochs, rational phase and cancellation/rearm remain explicit. Neither PIT
+  M_ref=5 nor P4 M15 is universal. Tier2 devices receive no grant from this rule.
+- **D3:** keyboard edges are timestamped at producer-to-emulator admission,
+  sequenced and source-identified, with no edge collapse. A complete prefix
+  through T precedes autonomous transfer through T, then guest I/O, then reset
+  semantics. Late insertion at/before the finalized frontier and resource
+  exhaustion fail explicitly. Source ownership/duplicate suppression remains;
+  transfer period is1/1920 second and key repeat remains outside the profile.
+
+These intentional normalizations are not hardware qualification or changes to
+legacy/default-OFF semantics. They grant no Linux-derived deadline/recovery
+policy, live serial semantics, floppy rotational model or new P4 time source.

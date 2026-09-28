@@ -1,3 +1,4 @@
+#include <tier1_machine.h>
 #include <mouse_machine.h>
 /**
  * @file	pccore.c
@@ -1106,6 +1107,10 @@ void pccore_cfgupdate(void) {
  * Reset the virtual machine
  */
 void pccore_reset(void) {
+#if defined(NP2_TIER1_MACHINE_TIME)
+  /* Cold boot only. Device keyboard reset-signal remains separately qualified. */
+  if (tier1_machine.ready || tier1_fake_now > TIER1_LIMIT || np2cfg.keyrepeat_enable || np2cfg.KEY_MODE) tier1_reject();
+#endif
 #if defined(NP2_MOUSE_MACHINE_TIME)
   if (mouse_machine_ready || mouse_fake_now > MOUSE_TIME_LIMIT_Q ||
       np2cfg.KEY_MODE == 3 || np2cfg.MOUSERAPID) mouse_machine_reject();
@@ -1395,6 +1400,9 @@ void pccore_reset(void) {
   fddfile_reset2dmode();
   bios0x18_16(0x20, 0xe1);
 
+  #if defined(NP2_TIER1_MACHINE_TIME)
+  if (!tier1_start(tier1_fake_now,pccore.baseclock)) tier1_reject();
+#endif
   iocore_reset(&np2cfg); // サウンドでpicを呼ぶので…
   cbuscore_reset(&np2cfg);
   fmboard_reset(&np2cfg, pccore.sound);

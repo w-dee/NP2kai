@@ -1,3 +1,4 @@
+#include <tier1_machine.h>
 #include <mouse_machine.h>
 #include	<compiler.h>
 #include <opna_timer_machine.h>
@@ -80,6 +81,7 @@ void pic_irq(void) {
 #endif
 	OPNA_TIMER_SERVICE();
 	MOUSE_MACHINE_SERVICE();
+    TIER1_SERVICE();
 	// 割込み許可？
 	if (!CPU_isEI) {
 		return;
@@ -158,6 +160,7 @@ void pic_irq(void) {												// ver0.78
 #endif
 	OPNA_TIMER_SERVICE();
 	MOUSE_MACHINE_SERVICE();
+    TIER1_SERVICE();
 	// 割込み許可？
 #if defined(SUPPORT_IA32_HAXM)
 	if (!np2hax.emumode && np2hax.enable && CPU_STAT_PM) {
@@ -326,6 +329,7 @@ static void IOOUTCALL pic_o00(UINT port, REG8 dat) {
 #endif
 	OPNA_TIMER_SERVICE();
 	MOUSE_MACHINE_SERVICE();
+    TIER1_SERVICE();
 	pic_enter_criticalsection();
 //	TRACEOUT(("pic %x %x", port, dat));
 	picp = &pic.pi[(port >> 3) & 1];
@@ -393,6 +397,7 @@ static void IOOUTCALL pic_o02(UINT port, REG8 dat) {
 #endif
 	OPNA_TIMER_SERVICE();
 	MOUSE_MACHINE_SERVICE();
+    TIER1_SERVICE();
 	pic_enter_criticalsection();
 //	TRACEOUT(("pic %x %x", port, dat));
 	picp = &pic.pi[(port >> 3) & 1];
@@ -431,6 +436,7 @@ static REG8 IOINPCALL pic_i00(UINT port) {
 #endif
 	OPNA_TIMER_SERVICE();
 	MOUSE_MACHINE_SERVICE();
+    TIER1_SERVICE();
 	picp = &pic.pi[(port >> 3) & 1];
 	if (!(picp->ocw3 & PIC_OCW3_RIS)) {
 		return(picp->irr);			// read irr
@@ -451,6 +457,7 @@ static REG8 IOINPCALL pic_i02(UINT port) {
 #endif
 	OPNA_TIMER_SERVICE();
 	MOUSE_MACHINE_SERVICE();
+    TIER1_SERVICE();
 	picp = &pic.pi[(port >> 3) & 1];
 	return(picp->imr);
 }

@@ -1,3 +1,4 @@
+#include <tier1_machine.h>
 //
 // FDC μPD765A
 //
@@ -55,7 +56,11 @@ void fdc_intwait(NEVENTITEM item) {
 
 void fdc_interrupt(void) {
 	
-	nevent_set(NEVENT_FDCINT, 512, fdc_intwait, NEVENT_ABSOLUTE);
+	#if defined(NP2_TIER1_MACHINE_TIME)
+    tier1_fdc_irq();
+#else
+    nevent_set(NEVENT_FDCINT, 512, fdc_intwait, NEVENT_ABSOLUTE);
+#endif
 }
 
 static void fdc_interruptreset(void) {
@@ -639,7 +644,7 @@ static void FDC_Recalibrate(void) {						// cmd: 07
 //				}
 				/* 170107 for Windows95 ... to */
 			}
-			fdc.int_timer[fdc.us] = FDC_INT_DELAY;
+			TIER1_SEEK(fdc.us, FDC_INT_DELAY);
 			fdc.status &= 0x0f;
 			fdc.status |= (1 << fdc.us);
 
@@ -850,7 +855,7 @@ static void FDC_Seek(void) {							// cmd: 0f
 				fdc_lasttreg[fdc.us] = fdc.treg[fdc.us];
 				/* 170107 for Windows95 ... to */
 			}
-			fdc.int_timer[fdc.us] = FDC_INT_DELAY;
+			TIER1_SEEK(fdc.us, FDC_INT_DELAY);
 			fdc.status &= 0x0f;
 			fdc.status |= (1 << fdc.us);
 //			fdc_interrupt();
@@ -1043,20 +1048,23 @@ void fdc_intdelay(void) {
 	int		i;
 
 	for (i = 0; i < 4; i++) {
-		if (fdc.int_timer[i]) {
+		#if !defined(NP2_TIER1_MACHINE_TIME)
+        if (fdc.int_timer[i]) {
 			fdc.int_timer[i]--;
 			if (!fdc.int_timer[i]) {
 				fdc.stat[i] = fdc.int_stat[i];
 				fdc_interrupt();
 			}
 		}
-		if(fdc_seeksndtimeout[i] > 0) fdc_seeksndtimeout[i]--;
+		#endif
+        if(fdc_seeksndtimeout[i] > 0) fdc_seeksndtimeout[i]--;
 	}
 }
 
 // ---- I/O
 
 static void IOOUTCALL fdc_o92(UINT port, REG8 dat) {
+    TIER1_SERVICE();
 
 	TRACEOUT(("fdc out %.2x %.2x [%.4x:%.4x]", port, dat, CPU_CS, CPU_IP));
 
@@ -1076,6 +1084,7 @@ static void IOOUTCALL fdc_o92(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL fdc_o94(UINT port, REG8 dat) {
+    TIER1_SERVICE();
 
 	UINT8	i;
 
@@ -1098,7 +1107,7 @@ static void IOOUTCALL fdc_o94(UINT port, REG8 dat) {
 				// FDCリセット後 1,024ms以内にINTがアクティブになる
 				for (i = 0; i < 4; i++) {
 					fdc.int_stat[i] = fdc.stat[i];
-					fdc.int_timer[i] = FDC_INT_DELAY;
+					TIER1_SEEK(i, FDC_INT_DELAY);
 				}
 			}
 		}
@@ -1109,7 +1118,7 @@ static void IOOUTCALL fdc_o94(UINT port, REG8 dat) {
 				for (i = 0; i < 4; i++) {
 					if (fdd_diskready(i)) {
 						fdc.int_stat[i] = FDCRLT_AI | i;
-						fdc.int_timer[i] = FDC_INT_DELAY;
+						TIER1_SEEK(i, FDC_INT_DELAY);
 						fdc.status |= (1 << i);
 					}
 				}
@@ -1121,6 +1130,7 @@ static void IOOUTCALL fdc_o94(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL fdc_i90(UINT port) {
+    TIER1_SERVICE();
 
 	TRACEOUT(("fdc in %.2x %.2x [%.4x:%.4x]", port, fdc.status,
 															CPU_CS, CPU_IP));
@@ -1132,6 +1142,7 @@ static REG8 IOINPCALL fdc_i90(UINT port) {
 }
 
 static REG8 IOINPCALL fdc_i92(UINT port) {
+    TIER1_SERVICE();
 
 	REG8	ret;
 
@@ -1150,6 +1161,7 @@ static REG8 IOINPCALL fdc_i92(UINT port) {
 }
 
 static REG8 IOINPCALL fdc_i94(UINT port) {
+    TIER1_SERVICE();
 
 	REG8 ret;
 
@@ -1180,6 +1192,7 @@ static REG8 IOINPCALL fdc_i94(UINT port) {
 
 
 static void IOOUTCALL fdc_obe(UINT port, REG8 dat) {
+    TIER1_SERVICE();
 	
 	TRACEOUT(("fdc out %.2x %.2x [%.4x:%.4x]", port, dat, CPU_CS, CPU_IP));
 
@@ -1194,6 +1207,7 @@ static void IOOUTCALL fdc_obe(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL fdc_ibe(UINT port) {
+    TIER1_SERVICE();
 
 	(void)port;
 	TRACEOUT(("fdc in %.2x %.2x [%.4x:%.4x]", port, ((fdc.chgreg & 3) | 8),
@@ -1203,6 +1217,7 @@ static REG8 IOINPCALL fdc_ibe(UINT port) {
 }
 
 static void IOOUTCALL fdc_o4be(UINT port, REG8 dat) {
+    TIER1_SERVICE();
 	
 	TRACEOUT(("fdc out %.2x %.2x [%.4x:%.4x]", port, dat, CPU_CS, CPU_IP));
 
@@ -1214,6 +1229,7 @@ static void IOOUTCALL fdc_o4be(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL fdc_i4be(UINT port) {
+    TIER1_SERVICE();
 
 	(void)port;
 	TRACEOUT(("fdc in %.2x %.2x [%.4x:%.4x]", port, (fdc.rpm[(fdc.reg144 >> 5) & 3] | 0xf0),
@@ -1232,6 +1248,9 @@ static const IOOUT fdcobe[1] = {fdc_obe};
 static const IOINP fdcibe[1] = {fdc_ibe};
 
 void fdc_reset(const NP2CFG *pConfig) {
+#if defined(NP2_TIER1_MACHINE_TIME)
+    tier1_fdc_reset();
+#endif
 
 	ZeroMemory(&fdc, sizeof(fdc));
 #ifdef SUPPORT_KAI_IMAGES

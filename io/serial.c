@@ -1,3 +1,4 @@
+#include <tier1_machine.h>
 /**
  * @file	serial.c
  * @brief	Keyboard & RS-232C Interface
@@ -34,13 +35,17 @@ void keyboard_callback(NEVENTITEM item) {
 //				TRACEOUT(("recv -> %02x", keybrd.data));
 			}
 			pic_setirq(1);
-			nevent_set(NEVENT_KEYBOARD, keybrd.xferclock,
-										keyboard_callback, NEVENT_RELATIVE);
+			#if defined(NP2_TIER1_MACHINE_TIME)
+            tier1_key_arm();
+#else
+            nevent_set(NEVENT_KEYBOARD, keybrd.xferclock, keyboard_callback, NEVENT_RELATIVE);
+#endif
 		}
 	}
 }
 
 static void IOOUTCALL keyboard_o41(UINT port, REG8 dat) {
+    TIER1_SERVICE();
 
 	if (keybrd.cmd & 1) {
 //		TRACEOUT(("send -> %02x", dat));
@@ -53,6 +58,7 @@ static void IOOUTCALL keyboard_o41(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL keyboard_o43(UINT port, REG8 dat) {
+    TIER1_SERVICE();
 
 //	TRACEOUT(("out43 -> %02x %.4x:%.8x", dat, CPU_CS, CPU_EIP));
 	if ((!(dat & 0x08)) && (keybrd.cmd & 0x08)) {
@@ -66,6 +72,7 @@ static void IOOUTCALL keyboard_o43(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL keyboard_i41(UINT port) {
+    TIER1_SERVICE();
 
 	(void)port;
 	keybrd.status &= ~2;
@@ -75,6 +82,7 @@ static REG8 IOINPCALL keyboard_i41(UINT port) {
 }
 
 static REG8 IOINPCALL keyboard_i43(UINT port) {
+    TIER1_SERVICE();
 
 	(void)port;
 //	TRACEOUT(("in43 -> %02x %.4x:%.8x", keybrd.status, CPU_CS, CPU_EIP));
@@ -109,6 +117,9 @@ void keyboard_bind(void) {
 }
 
 void keyboard_resetsignal(void) {
+#if defined(NP2_TIER1_MACHINE_TIME)
+    tier1_key_reset();
+#endif
 
 	nevent_reset(NEVENT_KEYBOARD);
 	keybrd.cmd = 0;
@@ -127,9 +138,18 @@ void keyboard_ctrl(REG8 data) {
 	if (keybrd.ctrls < KB_CTR) {
 		keybrd.ctr[(keybrd.ctrpos + keybrd.ctrls) & KB_CTRMASK] = data;
 		keybrd.ctrls++;
-		if (!nevent_iswork(NEVENT_KEYBOARD)) {
-			nevent_set(NEVENT_KEYBOARD, keybrd.xferclock,
-										keyboard_callback, NEVENT_ABSOLUTE);
+		if (
+#if defined(NP2_TIER1_MACHINE_TIME)
+            !tier1_machine.key_armed
+#else
+            !nevent_iswork(NEVENT_KEYBOARD)
+#endif
+        ) {
+			#if defined(NP2_TIER1_MACHINE_TIME)
+            tier1_key_arm();
+#else
+            nevent_set(NEVENT_KEYBOARD, keybrd.xferclock, keyboard_callback, NEVENT_ABSOLUTE);
+#endif
 		}
 	}
 }
@@ -139,9 +159,18 @@ void keyboard_send(REG8 data) {
 	if (keybrd.buffers < KB_BUF) {
 		keybrd.buf[(keybrd.bufpos + keybrd.buffers) & KB_BUFMASK] = data;
 		keybrd.buffers++;
-		if (!nevent_iswork(NEVENT_KEYBOARD)) {
-			nevent_set(NEVENT_KEYBOARD, keybrd.xferclock,
-										keyboard_callback, NEVENT_ABSOLUTE);
+		if (
+#if defined(NP2_TIER1_MACHINE_TIME)
+            !tier1_machine.key_armed
+#else
+            !nevent_iswork(NEVENT_KEYBOARD)
+#endif
+        ) {
+			#if defined(NP2_TIER1_MACHINE_TIME)
+            tier1_key_arm();
+#else
+            nevent_set(NEVENT_KEYBOARD, keybrd.xferclock, keyboard_callback, NEVENT_ABSOLUTE);
+#endif
 		}
 	}
 	else {

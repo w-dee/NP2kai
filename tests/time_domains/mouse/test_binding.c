@@ -7,6 +7,7 @@
 #include <opna_timer_machine.h>
 #include <gdc_machine.h>
 #include <mouse_machine.h>
+#include <tier1_machine.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

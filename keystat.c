@@ -1,3 +1,4 @@
+#include <tier1_machine.h>
 #include	<compiler.h>
 #include	<dosio.h>
 #include	<common/textfile.h>
@@ -415,6 +416,10 @@ void keystat_resendstat(void) {
 // ----
 
 void keystat_keydown(REG8 ref) {
+#if defined(NP2_TIER1_MACHINE_TIME)
+    /* No unstamped live ingress in the bounded fake-input profile. */
+    if (!tier1_dispatching) tier1_reject();
+#endif
 
 	UINT8	shift;
 const NKEYM	*nkey;
@@ -437,6 +442,10 @@ const NKEYM	*nkey;
 }
 
 void keystat_keyup(REG8 ref) {
+#if defined(NP2_TIER1_MACHINE_TIME)
+    /* No unstamped live ingress in the bounded fake-input profile. */
+    if (!tier1_dispatching) tier1_reject();
+#endif
 
 	UINT8	shift;
 const NKEYM	*nkey;

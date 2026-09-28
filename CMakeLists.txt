@@ -609,6 +609,18 @@ if(NP2_MOUSE_MACHINE_TIME)
     list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/mouse_time.c" "${CMAKE_CURRENT_SOURCE_DIR}/mouse_machine.c")
 endif()
 
+# Private owner-approved residual Tier1 qualification; no live time/input adapter.
+option(NP2_TIER1_MACHINE_TIME "Experimental normalized Tier1 fake-time qualification" OFF)
+if(NP2_TIER1_MACHINE_TIME)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT BUILD_SDL OR
+       NOT USE_SDL EQUAL 2 OR BUILD_WX OR BUILD_X OR BUILD_LIBRETRO OR
+       USE_ASYNCCPU OR USE_HAXM)
+        message(FATAL_ERROR "Tier1 pilot requires Linux SDL2 single-owner interpreter")
+    endif()
+    add_definitions(-DNP2_TIER1_MACHINE_TIME)
+    list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/tier1_machine.c")
+endif()
+
 # function
 if(USE_TICKCOUNT)
 	list(APPEND NP2kai_TickCount_definitions "SUPPORT_NP2_TICKCOUNT")

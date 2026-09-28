@@ -105,3 +105,20 @@ CPU/unrelated-device immutability during the held owner-service call. It does no
 qualify physical mouse timing, host input latency, movement waveform, live service
 deadlines, or any existing N1/N2/N3 assertion beyond their own contracts. Movement
 and input-prefix assertions belong to the separate N5 host qualification corpus.
+
+## Remaining Tier1 timing-policy qualification
+
+The [Tier1 fixture](../../tests/guest/tier1-timing/README.md) explicitly reuses
+N3's unchanged image/result/data assertions on separately recorded ON/OFF
+binaries, including new IA32 runs. Such a PASS preserves those bounded data,
+TC, result and real IRQ/PIC/EOI assertions; it never makes N3 an autonomous DMA
+oracle. Fake FDC deadlines are supplied separately by private host instrumentation.
+
+The separate DMA/HLT IPL asserts actual guest observation of a partial64-byte
+transfer during CPU work, unchanged CPU/DMA across a held-owner fake-time
+service, and four actual backend arbitration opportunities completing four
+bytes while halted. This is backend compatibility/relational evidence with
+injected dummy-endpoint readiness. It establishes no DMA bus frequency,
+physical transfer pace, universal HLT rule or P4 deadline. Keyboard timing and
+reset-signal assertions belong to the documented host real-I/O suite, not to
+this IPL's PASS.

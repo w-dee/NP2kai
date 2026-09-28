@@ -1,3 +1,4 @@
+#include <tier1_machine.h>
 #include	<compiler.h>
 #if !defined(DISABLE_MATH_H)
 #include	<math.h>
@@ -110,6 +111,9 @@ void gdcslavewait(NEVENTITEM item) {
 }
 
 void gdcsub_setslavewait(UINT32 wait) {
+#if defined(NP2_TIER1_MACHINE_TIME)
+    tier1_gdc_raw(wait); return;
+#endif
 
 	SINT32	clk;
 
@@ -122,6 +126,9 @@ void gdcsub_setslavewait(UINT32 wait) {
 }
 
 static void calc_gdcslavewait(UINT dots) {
+#if defined(NP2_TIER1_MACHINE_TIME)
+    tier1_gdc_wait(dots); return;
+#endif
 
 	SINT32	clk;
 

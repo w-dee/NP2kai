@@ -1,3 +1,4 @@
+#include <tier1_machine.h>
 #include	<compiler.h>
 #include <gdc_machine.h>
 #include	<scrnmng.h>
@@ -360,6 +361,7 @@ void gdc_work(int id) {
 
 // BIOSとかで弄った時にリセット
 void gdc_forceready(int id) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	GDCDATA	item;
@@ -463,6 +465,7 @@ void gdc_restorekacmode(void) {
 // ---- I/O master
 
 static void IOOUTCALL gdc_o60(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.m.cnt < GDCCMD_MAX) {
@@ -472,6 +475,7 @@ static void IOOUTCALL gdc_o60(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o62(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 	
 	if (gdc.m.cnt < GDCCMD_MAX) {
@@ -482,6 +486,7 @@ static void IOOUTCALL gdc_o62(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o64(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	gdc.vsyncint = 1;
@@ -490,6 +495,7 @@ static void IOOUTCALL gdc_o64(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o68(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	REG8	bit;
@@ -524,6 +530,7 @@ static void IOOUTCALL gdc_o68(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o6a(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	REG8	bit;
@@ -622,6 +629,7 @@ static void IOOUTCALL gdc_o6a(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_o6e(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	switch(dat) {
@@ -639,6 +647,7 @@ static void IOOUTCALL gdc_o6e(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL gdc_i60(UINT port) {
+    TIER1_SERVICE();
 
 	REG8	ret;
 #if defined(NP2_GDC_MACHINE_TIME)
@@ -704,6 +713,7 @@ static REG8 IOINPCALL gdc_i60(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_i62(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.m.snd) {
@@ -715,6 +725,7 @@ static REG8 IOINPCALL gdc_i62(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_i68(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	(void)port;
@@ -722,6 +733,7 @@ static REG8 IOINPCALL gdc_i68(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_i6a(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	(void)port;
@@ -732,6 +744,7 @@ static REG8 IOINPCALL gdc_i6a(UINT port) {
 // ---- I/O slave
 
 static void IOOUTCALL gdc_oa0(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.s.cnt < GDCCMD_MAX) {
@@ -745,6 +758,7 @@ static void IOOUTCALL gdc_oa0(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oa2(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 	
 	if (gdc.s.cnt < GDCCMD_MAX) {
@@ -756,6 +770,7 @@ static void IOOUTCALL gdc_oa2(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oa4(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if ((gdcs.disp ^ dat) & 1) {
@@ -766,6 +781,7 @@ static void IOOUTCALL gdc_oa4(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oa6(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	dat = dat & 1;
@@ -779,6 +795,7 @@ static void IOOUTCALL gdc_oa6(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL gdc_ia0(UINT port) {
+    TIER1_SERVICE();
 
 	REG8	ret;
 #if defined(NP2_GDC_MACHINE_TIME)
@@ -844,6 +861,7 @@ static REG8 IOINPCALL gdc_ia0(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_ia2(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.s.snd) {
@@ -855,6 +873,7 @@ static REG8 IOINPCALL gdc_ia2(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_ia4(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	(void)port;
@@ -862,6 +881,7 @@ static REG8 IOINPCALL gdc_ia4(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_ia6(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	(void)port;
@@ -872,6 +892,7 @@ static REG8 IOINPCALL gdc_ia6(UINT port) {
 // ---- I/O palette
 
 static void IOOUTCALL gdc_oa8(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.analog & ((1 << GDCANALOG_256) + (1 << GDCANALOG_16))) {
@@ -884,6 +905,7 @@ static void IOOUTCALL gdc_oa8(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oaa(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 #if defined(SUPPORT_PC9821)
@@ -906,6 +928,7 @@ static void IOOUTCALL gdc_oaa(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oac(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 #if defined(SUPPORT_PC9821)
@@ -928,6 +951,7 @@ static void IOOUTCALL gdc_oac(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL gdc_oae(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 #if defined(SUPPORT_PC9821)
@@ -951,6 +975,7 @@ static void IOOUTCALL gdc_oae(UINT port, REG8 dat) {
 
 #if defined(SUPPORT_PC9821)
 static REG8 IOINPCALL gdc_ia8(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.analog & ((1 << GDCANALOG_256) + (1 << GDCANALOG_16))) {
@@ -961,6 +986,7 @@ static REG8 IOINPCALL gdc_ia8(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_iaa(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.analog & (1 << GDCANALOG_256)) {
@@ -974,6 +1000,7 @@ static REG8 IOINPCALL gdc_iaa(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_iac(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.analog & (1 << GDCANALOG_256)) {
@@ -987,6 +1014,7 @@ static REG8 IOINPCALL gdc_iac(UINT port) {
 }
 
 static REG8 IOINPCALL gdc_iae(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if (gdc.analog & (1 << GDCANALOG_256)) {
@@ -1005,6 +1033,7 @@ static REG8 IOINPCALL gdc_iae(UINT port) {
 
 #if defined(SUPPORT_PC9821)
 static void IOOUTCALL gdc_o9a0(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	gdc.ff2 = dat;
@@ -1012,6 +1041,7 @@ static void IOOUTCALL gdc_o9a0(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL gdc_i9a0(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	REG8	ret;
@@ -1074,6 +1104,7 @@ static REG8 IOINPCALL gdc_i9a0(UINT port) {
 
 #if defined(SUPPORT_CRT31KHZ)
 static void IOOUTCALL gdc_o9a8(UINT port, REG8 dat) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	if ((gdc.display ^ (dat << GDCDISP_31)) & (1 << GDCDISP_31)) {
@@ -1084,6 +1115,7 @@ static void IOOUTCALL gdc_o9a8(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL gdc_i9a8(UINT port) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 	(void)port;
@@ -1118,6 +1150,7 @@ static const IOINP gdcia0[8] = {
 
 
 void gdc_biosreset(void) {
+	TIER1_SERVICE();
 	GDC_SERVICE();
 
 #if defined(SUPPORT_PC9821)
@@ -1206,6 +1239,9 @@ void gdc_biosreset(void) {
 }
 
 void gdc_reset(const NP2CFG *pConfig) {
+#if defined(NP2_TIER1_MACHINE_TIME)
+    tier1_gdc_reset();
+#endif
 #if defined(NP2_GDC_MACHINE_TIME)
 	gdc_machine_reset();
 #endif
