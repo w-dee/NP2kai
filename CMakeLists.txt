@@ -561,6 +561,31 @@ if(NP2_GDC_MACHINE_TIME)
     endif()
 endif()
 
+# Private PC-9801-86 native OPNA Timer A/B compatibility pilot; no M_ref.
+option(NP2_OPNA_TIMER_MACHINE_TIME "Experimental cold-boot OPNA Timer A/B machine time" OFF)
+option(NP2_OPNA_TIMER_FAKE_TIME "Private deterministic OPNA timer qualification source" OFF)
+if(NP2_OPNA_TIMER_FAKE_TIME AND NOT NP2_OPNA_TIMER_MACHINE_TIME)
+    message(FATAL_ERROR "OPNA timer fake source requires OPNA timer machine time")
+endif()
+if(NP2_OPNA_TIMER_MACHINE_TIME)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT BUILD_SDL OR
+       BUILD_WX OR BUILD_X OR BUILD_LIBRETRO OR USE_ASYNCCPU OR USE_HAXM OR
+       NOT USE_SDL EQUAL 2)
+        message(FATAL_ERROR "OPNA timer pilot requires Linux SDL2 single-owner interpreter")
+    endif()
+    add_definitions(-DNP2_OPNA_TIMER_MACHINE_TIME)
+    list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/opna_timer_time.c" "${CMAKE_CURRENT_SOURCE_DIR}/opna_timer_machine.c")
+    if(NP2_OPNA_TIMER_FAKE_TIME)
+        add_definitions(-DNP2_OPNA_TIMER_FAKE_TIME)
+        list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/opna_timer_time_fake.c")
+    else()
+        list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/opna_timer_time_posix.c")
+        if(NOT NP2_GDC_MACHINE_TIME OR NP2_GDC_FAKE_TIME)
+            list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/sdl/cpupacing.c")
+        endif()
+    endif()
+endif()
+
 # function
 if(USE_TICKCOUNT)
 	list(APPEND NP2kai_TickCount_definitions "SUPPORT_NP2_TICKCOUNT")

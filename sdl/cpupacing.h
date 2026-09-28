@@ -2,9 +2,11 @@
 #ifndef NP2_SDL_CPUPACING_H
 #define NP2_SDL_CPUPACING_H
 
-/* Private Linux SDL live-GDC implementation, not a CPU or device-time API.
- * OFF and deterministic GDC builds have no interpreter hot-path overhead. */
-#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+/* Private Linux SDL live-device implementation, not a CPU or device-time API.
+ * OFF and deterministic device builds have no interpreter hot-path overhead. */
+#if (defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)) || \
+    (defined(NP2_OPNA_TIMER_MACHINE_TIME) && !defined(NP2_OPNA_TIMER_FAKE_TIME))
+#define NP2_SDL_CPU_PACING 1
 #include <stdint.h>
 typedef struct {
     uint32_t origin, next, quantum;

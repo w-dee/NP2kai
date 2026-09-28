@@ -4,6 +4,7 @@
  */
 
 #include <compiler.h>
+#include <opna_timer_machine.h>
 #include "opntimer.h"
 #include <pccore.h>
 #include <io/iocore.h>
@@ -19,6 +20,9 @@ static const UINT8 s_irqtable[4] = {0x03, 0x0d, 0x0a, 0x0c};
  */
 static void set_fmtimeraevent(POPNA opna, NEVENTPOSITION absolute)
 {
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME)
+	if (opna == &g_opna[0]) return; /* analytical rearm already completed */
+#endif
 	SINT32 l;
 	int OPNAidx;
 	int v_NEVENT_FMTIMERA, v_NEVENT_FMTIMERB;
@@ -48,6 +52,9 @@ static void set_fmtimeraevent(POPNA opna, NEVENTPOSITION absolute)
  */
 static void set_fmtimerbevent(POPNA opna, NEVENTPOSITION absolute)
 {
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME)
+	if (opna == &g_opna[0]) return; /* analytical rearm already completed */
+#endif
 	SINT32 l;
 	int OPNAidx;
 	int v_NEVENT_FMTIMERA, v_NEVENT_FMTIMERB;
@@ -191,6 +198,9 @@ void opna_settimer(POPNA opna, REG8 cData)
 	}
 
 	opna->s.status &= ~((cData & 0x30) >> 4);
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME)
+	opna_timer_machine_control(cData);
+#else
 	if (cData & 0x01)
 	{
 		if (!nevent_iswork((NEVENTID)v_NEVENT_FMTIMERA))
@@ -214,6 +224,8 @@ void opna_settimer(POPNA opna, REG8 cData)
 	{
 		nevent_reset((NEVENTID)v_NEVENT_FMTIMERB);
 	}
+
+#endif
 
 	if ((!(cData & 0x03) || (cData & 0x30)) && (opna->s.irq != 0xff))
 	{

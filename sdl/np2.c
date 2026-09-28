@@ -1,6 +1,6 @@
 #include <compiler.h>
 #include <sdl/cpupacing.h>
-#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+#if defined(NP2_SDL_CPU_PACING)
 #include <cpucore.h>
 #endif
 #if defined(__LIBRETRO__)
@@ -247,7 +247,7 @@ changescreen(UINT8 newmode)
 
 // ---- proc
 
-#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+#if defined(NP2_SDL_CPU_PACING)
 static uint64_t pacing_wait_ns;
 #define framereset(cnt) do { framecnt = 0; pacing_wait_ns = 0; } while (0)
 #else
@@ -279,7 +279,7 @@ static void processwait(UINT cnt) {
 			}
 		}
 #endif
-#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+#if defined(NP2_SDL_CPU_PACING)
         /* The legacy taskmng_sleep can spin when thread support is absent. */
         SDL_Delay(1);
 #else
@@ -823,7 +823,7 @@ havemmx(void)
 #endif /* GCC_CPU_ARCH_IA32 */
 }
 
-#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+#if defined(NP2_SDL_CPU_PACING)
 /* Keep the frame and interpreter stacks live across host-only pacing yields.
  * Frontend events/reset remain at the ordinary non-reentrant frame boundary. */
 static void paced_exec(BOOL draw)
@@ -889,7 +889,7 @@ static void np2exec()
 				paced_exec(framecnt == 0);
 				framecnt++;
 				cnt = timing_getcount();
-#if defined(NP2_GDC_MACHINE_TIME) && !defined(NP2_GDC_FAKE_TIME)
+#if defined(NP2_SDL_CPU_PACING)
                 cnt = sdl_cpu_pacing_work_count(timing_getcount_raw(),
                     pacing_wait_ns, timing_getmsstep(), np2cfg.emuspeed * 128 / 100);
 #endif

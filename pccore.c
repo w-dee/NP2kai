@@ -7,6 +7,7 @@
  */
 
 #include <compiler.h>
+#include <opna_timer_machine.h>
 #include <gdc_machine.h>
 #include <common/strres.h>
 #include <dosio.h>
@@ -1108,6 +1109,9 @@ void pccore_reset(void) {
   int i;
   BOOL epson;
 
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME)
+  opna_timer_machine_discard();
+#endif
   time_shadow_reset();
 
 #if defined(SUPPORT_IA32_HAXM)
@@ -2032,6 +2036,19 @@ void pccore_exec(BOOL draw) {
     } else
 #endif
     {
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME)
+      /* Scheduling opportunity only: the timer source remains autonomous.
+       * Match SDL's existing 0.5 ms CPU-throughput quantum, including HLT.
+       * Paired rebase preserves the current ledger position and every NEVENT
+       * deadline. The normal nevent_progress/PIC loop consumes this slice;
+       * the existing frame setup/tail still execute exactly once. */
+      {
+        UINT32 opportunity = pccore.realclock / 2000;
+        if (!opportunity) opportunity = 1;
+        if (legacy_cpu_remaining() > (SINT32)opportunity)
+          legacy_cpu_rebase_slice(legacy_cpu_remaining() - (SINT32)opportunity);
+      }
+#endif
 #if !defined(SINGLESTEPONLY)
       if (legacy_cpu_remaining() > 0) {
         if (!(CPU_TYPE & CPUTYPE_V30)) {

@@ -1,4 +1,5 @@
 #include	<compiler.h>
+#include <opna_timer_machine.h>
 #include	<joymng.h>
 #include	<soundmng.h>
 #include	<pccore.h>
@@ -204,6 +205,10 @@ void fmboard_reset(const NP2CFG *pConfig, SOUNDID nSoundID)
 	UINT i;
 	UINT8 cross = 0;
 
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME)
+	opna_timer_machine_discard();
+	opna_timer_machine_admit(nSoundID);
+#endif
 	soundrom_reset();
 	beep_reset();												// ver0.27a
 

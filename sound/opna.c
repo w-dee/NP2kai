@@ -8,6 +8,7 @@
 #endif
 
 #include <compiler.h>
+#include <opna_timer_machine.h>
 #include "opna.h"
 #include <pccore.h>
 #include <io/iocore.h>
@@ -406,6 +407,9 @@ REG8 opna_readExtendedStatus(POPNA opna)
  */
 void opna_writeRegister(POPNA opna, UINT nAddress, REG8 cData)
 {
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME)
+	if (opna == &g_opna[0]) opna_timer_machine_write(nAddress, cData);
+#endif
 	opna->s.reg[nAddress] = cData;
 
 	if (opna->s.cCaps & OPNA_S98)

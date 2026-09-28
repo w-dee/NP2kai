@@ -1,4 +1,5 @@
 #include	<compiler.h>
+#include <opna_timer_machine.h>
 #include <gdc_machine.h>
 #if defined(NP2_PIT_PIC_MACHINE_TIME)
 #include <pit0_time.h>
@@ -76,6 +77,7 @@ void pic_irq(void) {
 #elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
+	OPNA_TIMER_SERVICE();
 	// 割込み許可？
 	if (!CPU_isEI) {
 		return;
@@ -152,6 +154,7 @@ void pic_irq(void) {												// ver0.78
 #elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
+	OPNA_TIMER_SERVICE();
 	// 割込み許可？
 #if defined(SUPPORT_IA32_HAXM)
 	if (!np2hax.emumode && np2hax.enable && CPU_STAT_PM) {
@@ -318,6 +321,7 @@ static void IOOUTCALL pic_o00(UINT port, REG8 dat) {
 #elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
+	OPNA_TIMER_SERVICE();
 	pic_enter_criticalsection();
 //	TRACEOUT(("pic %x %x", port, dat));
 	picp = &pic.pi[(port >> 3) & 1];
@@ -383,6 +387,7 @@ static void IOOUTCALL pic_o02(UINT port, REG8 dat) {
 #elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
+	OPNA_TIMER_SERVICE();
 	pic_enter_criticalsection();
 //	TRACEOUT(("pic %x %x", port, dat));
 	picp = &pic.pi[(port >> 3) & 1];
@@ -419,6 +424,7 @@ static REG8 IOINPCALL pic_i00(UINT port) {
 #elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
+	OPNA_TIMER_SERVICE();
 	picp = &pic.pi[(port >> 3) & 1];
 	if (!(picp->ocw3 & PIC_OCW3_RIS)) {
 		return(picp->irr);			// read irr
@@ -437,6 +443,7 @@ static REG8 IOINPCALL pic_i02(UINT port) {
 #elif defined(NP2_PIT_PIC_MACHINE_TIME)
 	pit0_machine_service();
 #endif
+	OPNA_TIMER_SERVICE();
 	picp = &pic.pi[(port >> 3) & 1];
 	return(picp->imr);
 }

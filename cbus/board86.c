@@ -4,6 +4,7 @@
  */
 
 #include <compiler.h>
+#include <opna_timer_machine.h>
 #include <cbus/board86.h>
 #include <io/iocore.h>
 #include <cbus/cbuscore.h>
@@ -53,6 +54,7 @@ static void IOOUTCALL opna_o18e(UINT port, REG8 dat)
 
 static REG8 IOINPCALL opna_i188(UINT port)
 {
+	OPNA_TIMER_SERVICE();
 	(void)port;
 	return g_opna[0].s.status;
 }
@@ -81,6 +83,7 @@ static REG8 IOINPCALL opna_i18a(UINT port)
 
 static REG8 IOINPCALL opna_i18c(UINT port)
 {
+	OPNA_TIMER_SERVICE();
 	if (g_opna[0].s.extend)
 	{
 		return opna_readExtendedStatus(&g_opna[0]);
@@ -161,6 +164,9 @@ void board86_reset(const NP2CFG *pConfig, BOOL adpcm)
 	g_opna[0].s.base = (pConfig->snd86opt & 0x01) ? 0x000 : 0x100;
 	fmboard_extreg(extendchannel);
 	pcm86io_setopt(pConfig->snd86opt);
+#if defined(NP2_OPNA_TIMER_MACHINE_TIME)
+	opna_timer_machine_reset();
+#endif
 }
 
 /**
