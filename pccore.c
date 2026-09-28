@@ -1,3 +1,4 @@
+#include <mouse_machine.h>
 /**
  * @file	pccore.c
  * @brief	emluration core
@@ -1105,6 +1106,10 @@ void pccore_cfgupdate(void) {
  * Reset the virtual machine
  */
 void pccore_reset(void) {
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  if (mouse_machine_ready || mouse_fake_now > MOUSE_TIME_LIMIT_Q ||
+      np2cfg.KEY_MODE == 3 || np2cfg.MOUSERAPID) mouse_machine_reject();
+#endif
 
   int i;
   BOOL epson;

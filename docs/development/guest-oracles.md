@@ -95,3 +95,13 @@ N3 pins the legacy emulator's direct FDC/DMA behavior with relational device ass
 ## Rule for future missions
 
 Read this contract before using an established oracle as a gate. Name the exact proposition a PASS supports and retain its non-claims. Preserve established semantics unless the owner explicitly authorizes revision. When extending an oracle, document both the added positive assertion and its limits, and provide suitable authority before making any hardware-qualified claim.
+
+## N5 normalized mouse IRQ fixture
+
+The separate [N5 IPL](../../tests/guest/i286-time-mouse/README.md) qualifies the
+owner-approved normalized mouse profile's finite pending IRQ13 behavior, real
+CPU acceptance, ISR/EOI and HLT wake under private fake time. Its PASS includes
+CPU/unrelated-device immutability during the held owner-service call. It does not
+qualify physical mouse timing, host input latency, movement waveform, live service
+deadlines, or any existing N1/N2/N3 assertion beyond their own contracts. Movement
+and input-prefix assertions belong to the separate N5 host qualification corpus.

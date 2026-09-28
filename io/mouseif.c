@@ -5,6 +5,7 @@
 #include <keystat.h>
 #include <mousemng.h>
 #include <pccore.h>
+#include <mouse_machine.h>
 
 // マウス ver0.28
 // 一部のゲームでマウスデータを切り捨てるので正常な動かなくなる事がある
@@ -17,6 +18,10 @@ static int mouseif_test = 0;
 int mouseif_absflag = 0;
 
 void mouseif_sync(void) {
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  mouse_machine_service();
+  return;
+#endif
 
   // 前回の分を補正
   mouseif.x += mouseif.rx;
@@ -63,6 +68,10 @@ void mouseif_sync(void) {
 }
 
 static void calc_mousexy(void) {
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  mouse_machine_service();
+  return;
+#endif
 
 #if defined(VAEG_EXT)
   static UINT32 rapidlastc;
@@ -130,6 +139,10 @@ static void calc_mousexy(void) {
 }
 
 void mouseint(NEVENTITEM item) {
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  (void)item;
+  mouse_machine_reject(); /* Legacy timer must never run in this profile. */
+#endif
 
   if (item->flag & NEVENT_SETEVENT) {
     if (!(mouseif.upd8255.portc & 0x10)) {
@@ -141,6 +154,7 @@ void mouseint(NEVENTITEM item) {
 }
 
 static void setportc(REG8 value) {
+  MOUSE_MACHINE_SERVICE();
 
   if ((value & 0x80) && (!(mouseif.upd8255.portc & 0x80))) {
     calc_mousexy();
@@ -162,6 +176,10 @@ static void setportc(REG8 value) {
       mouseif.latch_y = -128;
     }
   }
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  mouse_machine_import_live();
+  mouse_machine_control(value);
+#else
   if ((value ^ mouseif.upd8255.portc) & 0x10) {
     if (!(value & 0x10)) {
       if (!nevent_iswork(NEVENT_MOUSE)) {
@@ -172,18 +190,21 @@ static void setportc(REG8 value) {
       }
     }
   }
+#endif
   mouseif.upd8255.portc = (UINT8)value;
 }
 
 // ---- I/O
 
 static void IOOUTCALL mouseif_o7fd9(UINT port, REG8 dat) {
+  MOUSE_MACHINE_SERVICE();
 
   mouseif.upd8255.porta = dat;
   (void)port;
 }
 
 static void IOOUTCALL mouseif_o7fdb(UINT port, REG8 dat) {
+  MOUSE_MACHINE_SERVICE();
 
   mouseif.upd8255.portb = dat;
   (void)port;
@@ -196,6 +217,7 @@ static void IOOUTCALL mouseif_o7fdd(UINT port, REG8 dat) {
 }
 
 static void IOOUTCALL mouseif_o7fdf(UINT port, REG8 dat) {
+  MOUSE_MACHINE_SERVICE();
 
   REG8 portc;
   UINT sft;
@@ -219,6 +241,7 @@ static void IOOUTCALL mouseif_o7fdf(UINT port, REG8 dat) {
 }
 
 static REG8 IOINPCALL mouseif_i7fd9(UINT port) {
+  MOUSE_MACHINE_SERVICE();
 
   SINT16 x;
   SINT16 y;
@@ -278,6 +301,7 @@ static REG8 IOINPCALL mouseif_i7fd9(UINT port) {
 }
 
 static REG8 IOINPCALL mouseif_i7fdb(UINT port) {
+  MOUSE_MACHINE_SERVICE();
 
   if (mouseif.upd8255.mode & uPD8255_PORTB) {
     return (0x40);
@@ -288,6 +312,7 @@ static REG8 IOINPCALL mouseif_i7fdb(UINT port) {
 }
 
 static REG8 IOINPCALL mouseif_i7fdd(UINT port) {
+  MOUSE_MACHINE_SERVICE();
 
   REG8 mode;
   REG8 ret;
@@ -308,14 +333,22 @@ static REG8 IOINPCALL mouseif_i7fdd(UINT port) {
 }
 
 static void IOOUTCALL mouseif_obfdb(UINT port, REG8 dat) {
+  MOUSE_MACHINE_SERVICE();
 
   mouseif.timing = dat & 3;
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  mouse_machine.rate = mouseif.timing;
+#endif
   (void)port;
 }
 
 // ---- I/F
 
 void mouseif_reset(const NP2CFG *pConfig) {
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  if (mouse_machine_ready || mouse_fake_now > MOUSE_TIME_LIMIT_Q || pConfig->KEY_MODE == 3 || pConfig->MOUSERAPID || mouseif_absflag)
+    mouse_machine_reject();
+#endif
 
   ZeroMemory(&mouseif, sizeof(mouseif));
   mouseif.upd8255.porta = 0x00;
@@ -326,6 +359,9 @@ void mouseif_reset(const NP2CFG *pConfig) {
   mouseif.latch_x = -1;
   mouseif.latch_y = -1;
 
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  mouse_machine_reset();
+#endif
   // mouseif.timing = 2;
   (void)pConfig;
 }

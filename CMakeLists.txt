@@ -593,6 +593,22 @@ if(NP2_OPNA_TIMER_MACHINE_TIME)
     endif()
 endif()
 
+# Owner-approved normalized N5 profile; private fake source only in this pilot.
+option(NP2_MOUSE_MACHINE_TIME "Experimental cold-boot normalized mouse" OFF)
+option(NP2_MOUSE_FAKE_TIME "Private deterministic timestamped mouse source" OFF)
+if(NP2_MOUSE_FAKE_TIME AND NOT NP2_MOUSE_MACHINE_TIME)
+    message(FATAL_ERROR "Mouse fake source requires normalized mouse profile")
+endif()
+if(NP2_MOUSE_MACHINE_TIME)
+    if(NOT NP2_MOUSE_FAKE_TIME OR NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+       NOT BUILD_SDL OR NOT USE_SDL EQUAL 2 OR BUILD_WX OR BUILD_X OR
+       BUILD_LIBRETRO OR USE_ASYNCCPU OR USE_HAXM)
+        message(FATAL_ERROR "N5 pilot requires fake time/input, Linux SDL2 single-owner interpreter")
+    endif()
+    add_definitions(-DNP2_MOUSE_MACHINE_TIME -DNP2_MOUSE_FAKE_TIME)
+    list(APPEND NP2kai_common_sources "${CMAKE_CURRENT_SOURCE_DIR}/mouse_time.c" "${CMAKE_CURRENT_SOURCE_DIR}/mouse_machine.c")
+endif()
+
 # function
 if(USE_TICKCOUNT)
 	list(APPEND NP2kai_TickCount_definitions "SUPPORT_NP2_TICKCOUNT")

@@ -1,3 +1,4 @@
+#include <mouse_machine.h>
 #include <common/strres.h>
 #include <compiler.h>
 
@@ -747,6 +748,9 @@ static void np2sysp_cngconfig(const void *arg1, long arg2) {
   (void)arg2;
 }
 static void np2sysp_getmpos(const void *arg1, long arg2) {
+#if defined(NP2_MOUSE_MACHINE_TIME)
+  mouse_machine_reject(); /* Alternate absolute/direct-manager protocols deferred. */
+#endif
   OEMCHAR str[16] = {0};
   int mouseX, mouseY;
   UINT8 mode = (np2sysp.outval >> 24) & 0xff;

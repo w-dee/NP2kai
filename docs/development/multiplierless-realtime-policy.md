@@ -210,3 +210,13 @@ Stop and escalate before a future change:
   clock-source decoupling, or overrides hardware-qualified behavior with a
   legacy quirk; or
 - changes the ESP32-P4 deadline/service model without explicit review.
+
+## Owner-approved N5 normalized mouse exception
+
+The owner separately authorized the [N5 normalized mouse profile](mouse-machine-time.md):
+autonomous 56.4 Hz input capture, continuous rational movement, exact normal-domain
+mouse IRQ rates, and input/capture/expiry/I/O ordering at equal time. This explicit
+normalization removes legacy CPU/read-cadence dependence; it is not covered by a
+claim of unchanged legacy semantics or hardware qualification. Default OFF keeps
+the existing path. The bounded fake-time pilot grants no time authority to other
+devices and no Linux/P4 deadline or host-arrival mapping policy.
