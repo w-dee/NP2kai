@@ -2,6 +2,8 @@
 #include	<cpucore.h>
 #include	<sound/sound.h>
 #include	<sound/beep.h>
+#include	<sound/beep_waveform_policy.h>
+#include	<string.h>
 #include	<pccore.h>
 
 
@@ -111,7 +113,7 @@ const BPEVENT	*bev;
 					samp += (bp->cnt & 0x8000)?1:-1;
 					bp->cnt += bp->hz;
 					samp *= vol;
-					samp <<= (10 - 2);
+					samp *= (1 << (10 - 2));
 					if(samp > 32767) samp = 0; // XXX: 処理落ち時のノイズ回避 np21w ver0.86 rev42
 					if(samp < -32768) samp = 0; // XXX: 処理落ち時のノイズ回避 np21w ver0.86 rev42
 					pcm[0] += samp * volM / 100;
@@ -175,3 +177,64 @@ void SOUNDCALL beep_getpcm(BEEP bp, SINT32 *pcm, UINT count) {
 	}
 }
 
+
+/* Ordered machine-time events are applied by the owner at ceil-mapped
+ * frontiers. Renderer state and offset have no call-local clock. */
+void beep_waveform_reset(BEEP_WAVEFORM_STATE *state) {
+    memset(state, 0, sizeof(*state));
+}
+void beep_waveform_mode(BEEP_WAVEFORM_STATE *state, UINT8 mode) {
+    state->mode = mode;
+    state->enabled = 0;
+    state->have_data = 0;
+    state->edge_pending = 0;
+}
+void beep_waveform_data(BEEP_WAVEFORM_STATE *state, UINT16 data) {
+    state->data = data;
+    state->have_data = 1;
+}
+void beep_waveform_hz(BEEP_WAVEFORM_STATE *state, UINT16 hz) {
+    state->hz = hz;
+}
+void beep_waveform_edge(BEEP_WAVEFORM_STATE *state, UINT8 enabled) {
+    state->enabled = !!enabled;
+    state->phase = 0;
+    state->edge_pending = 1;
+}
+void beep_waveform_render(BEEP_WAVEFORM_STATE *state, SINT32 *pcm, UINT count,
+        SINT32 volume, SINT32 master_volume, UINT8 adaptive_offset) {
+    while (count--) {
+        SINT32 sample = 0;
+        if (state->mode == 0 && state->have_data) {
+            /* Source mode 0 holds the latest PIT data until another write. */
+            sample = (SINT32)(((int64_t)state->data * 0x5000 * volume) / 256);
+            if (adaptive_offset && state->offset_count < 500) {
+                state->offset_sum += sample;
+                state->offset_count++;
+                state->offset = (SINT32)(state->offset_sum / state->offset_count);
+            }
+            sample -= adaptive_offset ? state->offset : 0x2500 * volume;
+        }
+        else if (state->mode == 1) {
+            if (state->edge_pending) {
+                /* Native exact-boundary event sample uses the new duty
+                 * value; four-step phase resumes on the next sample. */
+                sample = state->enabled ? volume * (1 << 10) : 0;
+                state->edge_pending = 0;
+            }
+            else if (state->enabled) {
+                UINT i;
+                for (i = 0; i < 4; i++) {
+                    sample += (state->phase & 0x8000) ? 1 : -1;
+                    state->phase = (UINT16)(state->phase + state->hz);
+                }
+                sample *= volume * (1 << (10 - 2));
+                if (sample > 32767 || sample < -32768) sample = 0;
+            }
+        }
+        sample = (SINT32)(((int64_t)sample * master_volume) / 100);
+        pcm[0] += sample;
+        pcm[1] += sample;
+        pcm += 2;
+    }
+}

@@ -5,6 +5,7 @@
 
 #include <compiler.h>
 #include <sound/opngen.h>
+#include "opngen_waveform_policy.h"
 #include "opngencfg.h"
 
 #if defined(OPNGENX86)
@@ -74,7 +75,7 @@ static void calcratechannel(OPNGEN opngen, OPNCH *ch)
 		{
 			/* with self feed back */
 			opout = ch->op1fb;
-			ch->op1fb = SLOTOUT(envout, ch->slot[0].freq_cnt + ((ch->op1fb >> ch->feedback) << (FREQ_BITS - (TL_BITS - 2))));
+			ch->op1fb = SLOTOUT(envout, ch->slot[0].freq_cnt + (ch->op1fb >> ch->feedback));
 			opout = (opout + ch->op1fb) >> 1;
 		}
 		else
@@ -96,23 +97,23 @@ static void calcratechannel(OPNGEN opngen, OPNCH *ch)
 	CALCENV(envout, ch, 1);
 	if (envout >= 0)
 	{
-		*ch->connect2 += SLOTOUT(envout, ch->slot[1].freq_cnt + (opngen->feedback2 << (FREQ_BITS - (TL_BITS - 2))));
+		*ch->connect2 += SLOTOUT(envout, ch->slot[1].freq_cnt + opngen->feedback2);
 	}
 	/* SLOT 3 */
 	CALCENV(envout, ch, 2);
 	if (envout >= 0)
 	{
-		*ch->connect3 += SLOTOUT(envout, ch->slot[2].freq_cnt + (opngen->feedback3 << (FREQ_BITS - (TL_BITS - 2))));
+		*ch->connect3 += SLOTOUT(envout, ch->slot[2].freq_cnt + opngen->feedback3);
 	}
 	/* SLOT 4 */
 	CALCENV(envout, ch, 3);
 	if (envout >= 0)
 	{
-		*ch->connect4 += SLOTOUT(envout, ch->slot[3].freq_cnt + (opngen->feedback4 << (FREQ_BITS - (TL_BITS - 2))));
+		*ch->connect4 += SLOTOUT(envout, ch->slot[3].freq_cnt + opngen->feedback4);
 	}
 }
 
-void SOUNDCALL opngen_getpcm(OPNGEN opngen, SINT32 *pcm, UINT count)
+static void opngen_getpcm_policy(OPNGEN opngen, SINT32 *pcm, UINT count, int continuous)
 {
 	SINT32 samp_l;
 	SINT32 samp_r;
@@ -120,7 +121,7 @@ void SOUNDCALL opngen_getpcm(OPNGEN opngen, SINT32 *pcm, UINT count)
 	UINT i;
 	OPNCH *ch;
 
-	if ((!opngen->playing) || (!count))
+	if ((!count) || ((!opngen->playing) && (!continuous)))
 	{
 		return;
 	}
@@ -194,7 +195,7 @@ void SOUNDCALL opngen_getpcm(OPNGEN opngen, SINT32 *pcm, UINT count)
 	} while (--count);
 }
 
-void SOUNDCALL opngen_getpcmvr(OPNGEN opngen, SINT32 *pcm, UINT count)
+static void opngen_getpcmvr_policy(OPNGEN opngen, SINT32 *pcm, UINT count, int continuous)
 {
 	SINT32 samp_l;
 	SINT32 samp_r;
@@ -202,7 +203,7 @@ void SOUNDCALL opngen_getpcmvr(OPNGEN opngen, SINT32 *pcm, UINT count)
 	UINT i;
 	OPNCH *ch;
 
-	if ((!opngen->playing) || (!count))
+	if ((!count) || ((!opngen->playing) && (!continuous)))
 	{
 		return;
 	}
@@ -282,4 +283,25 @@ void SOUNDCALL opngen_getpcmvr(OPNGEN opngen, SINT32 *pcm, UINT count)
 		opngen->calcremain = opncfg.calc1024 - opngen->calcremain;
 		pcm += 2;
 	} while (--count);
+}
+
+/* The reference profile is private. Legacy callers retain their original path. */
+void SOUNDCALL opngen_getpcm(OPNGEN opngen, SINT32 *pcm, UINT count)
+{
+    opngen_getpcm_policy(opngen, pcm, count, 0);
+}
+
+void SOUNDCALL opngen_getpcmvr(OPNGEN opngen, SINT32 *pcm, UINT count)
+{
+    opngen_getpcmvr_policy(opngen, pcm, count, 0);
+}
+
+void SOUNDCALL opngen_getpcm_continuous(OPNGEN opngen, SINT32 *pcm, UINT count)
+{
+    opngen_getpcm_policy(opngen, pcm, count, 1);
+}
+
+void SOUNDCALL opngen_getpcmvr_continuous(OPNGEN opngen, SINT32 *pcm, UINT count)
+{
+    opngen_getpcmvr_policy(opngen, pcm, count, 1);
 }
